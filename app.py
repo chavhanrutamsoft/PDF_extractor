@@ -87,7 +87,7 @@ def main() -> None:
 
     with st.sidebar:
         st.subheader("Extraction Settings")
-        pages_text = st.text_input("Pages (comma/range)", value="16-20")
+        pages_text = st.text_input("Pages (comma/range)", value="")
         catalog_regex = st.text_input(
             "Catalog regex",
             value=r"(?i)^[A-Z0-9_]{5,}$",
