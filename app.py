@@ -145,10 +145,6 @@ def main() -> None:
                 target_pages=target_pages,
                 catalog_regex=catalog_regex,
             )
-            if not df_struct.empty and "page" in df_struct.columns:
-                struct_pages = set(df_struct["page"].astype(int).tolist())
-                if "page" in df_text.columns:
-                    df_text = df_text[~df_text["page"].astype(int).isin(struct_pages)]
             df = merge_catalog_price_results(df_struct, df_text)
         else:
             df = df_struct
