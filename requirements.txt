@@ -4,8 +4,8 @@ pandas>=2.0.0
 pydantic>=2.0.0
 PyYAML>=6.0
 streamlit>=1.32.0
+openpyxl>=3.1.0
 
 # Optional: Parquet export from CLI — pip install pyarrow
 # Optional: borderless table fallback (requires Ghostscript on PATH for Windows) — pip install "camelot-py[cv]"
-# Optional: Excel export from CLI — pip install openpyxl
 # Optional: tests — pip install pytest

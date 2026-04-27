@@ -135,14 +135,25 @@ def main() -> None:
     st.success(f"Extraction complete. Found {len(df)} rows.")
     st.dataframe(df, use_container_width=True, hide_index=True)
 
-    excel_bytes = dataframe_to_excel_bytes(df)
-    out_name = f"{Path(uploaded_pdf.name).stem}_catalog_prices.xlsx"
-    st.download_button(
-        "Download Excel",
-        data=excel_bytes,
-        file_name=out_name,
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    )
+    out_stem = f"{Path(uploaded_pdf.name).stem}_catalog_prices"
+    try:
+        excel_bytes = dataframe_to_excel_bytes(df)
+        st.download_button(
+            "Download Excel",
+            data=excel_bytes,
+            file_name=f"{out_stem}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+    except ModuleNotFoundError:
+        # Fallback for environments where openpyxl is unavailable.
+        csv_bytes = df.to_csv(index=False).encode("utf-8")
+        st.warning("openpyxl is not installed in this environment. Downloading CSV instead.")
+        st.download_button(
+            "Download CSV",
+            data=csv_bytes,
+            file_name=f"{out_stem}.csv",
+            mime="text/csv",
+        )
 
 
 if __name__ == "__main__":
