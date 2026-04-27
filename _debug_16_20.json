@@ -1,0 +1,327 @@
+{
+  "source_pdf": "Panel Builder_Pricelist.pdf",
+  "tables": [
+    {
+      "table_id": "p016_t07",
+      "page": 16,
+      "page_index_0": 15,
+      "keywords_matched": [],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9541,
+      "headers": [
+        "col_0",
+        "200A",
+        "LV525302FT",
+        "24920",
+        "LV525312FT",
+        "31150"
+      ],
+      "rows": [
+        [
+          "Breaking Capacity as per IEC 60947-2",
+          "Rated Current",
+          "Three Pole Reference",
+          "Unit MRP [`]",
+          "Four Pole Reference",
+          "Unit MRP [`]"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.643600000000006,
+        240.77800000000016,
+        538.7127340740741,
+        272.015
+      ],
+      "page_score": 5
+    },
+    {
+      "table_id": "p016_t14",
+      "page": 16,
+      "page_index_0": 15,
+      "keywords_matched": [],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9541,
+      "headers": [
+        "col_0",
+        "200A",
+        "LV525332FT",
+        "28420",
+        "LV525342FT",
+        "35190"
+      ],
+      "rows": [
+        [
+          "Breaking Capacity as per IEC 60947-2",
+          "Rated Current",
+          "Three Pole Reference",
+          "Unit MRP [`]",
+          "Four Pole Reference",
+          "Unit MRP [`]"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.643600000000006,
+        436.433,
+        538.7127340740741,
+        467.66900000000004
+      ],
+      "page_score": 5
+    },
+    {
+      "table_id": "p017_t07",
+      "page": 17,
+      "page_index_0": 16,
+      "keywords_matched": [],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.95,
+      "headers": [
+        "col_0",
+        "200A",
+        "LV525302 (cid:2)",
+        "29410",
+        "LV525312",
+        "36770"
+      ],
+      "rows": [
+        [
+          "Breaking Capacity as per IEC 60947-2",
+          "Rated Current",
+          "Three Pole Reference",
+          "Unit MRP [`]",
+          "Four Pole Reference",
+          "Unit MRP [`]"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.604875,
+        240.66407142857148,
+        550.8732005128205,
+        273.1627142857143
+      ],
+      "page_score": 5
+    },
+    {
+      "table_id": "p017_t14",
+      "page": 17,
+      "page_index_0": 16,
+      "keywords_matched": [],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.95,
+      "headers": [
+        "col_0",
+        "200A",
+        "LV525332",
+        "33530",
+        "LV525342 (cid:2)",
+        "41540"
+      ],
+      "rows": [
+        [
+          "Breaking Capacity as per IEC 60947-2",
+          "Rated Current",
+          "Three Pole Reference",
+          "Unit MRP [`]",
+          "Four Pole Reference",
+          "Unit MRP [`]"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.604875,
+        435.94308333333333,
+        550.8732005128205,
+        468.09228571428577
+      ],
+      "page_score": 5
+    },
+    {
+      "table_id": "p017_t26",
+      "page": 17,
+      "page_index_0": 16,
+      "keywords_matched": [],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.5453,
+      "headers": [
+        "FFoorr Ddeettaaiillss oonn nstoonc-ksatabnled aarndd r neofenr-esntocceksa, btelec hsntaictuasl ,p taercahmneictearl sp, asrtaomckeatebrl,e p alenads neo Cno-snttoacckt aCbules tsotmateurs ,C palreea Csee nctorentact Customer Care Centre.",
+        "col_1",
+        "col_2",
+        "col_3",
+        "col_4"
+      ],
+      "rows": [
+        [
+          "FFoorr Ddeettaaiillss oonn nstoonc-ksatabnled aarndd r neofenr-esntocceksa, btelec hsntaictuasl ,p taercahmneictearl sp, asrtaomckeatebrl,e p alenads neo Cno-snttoacckt aCbules tsotmateurs ,C palreea Csee nctorentact Customer Care Centre.",
+          "(cid:2)",
+          "(cid:3)NORMAL STOCK ITEMS",
+          null,
+          "W.E.F. April 01st, 2026"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.604875,
+        790.1262,
+        550.8732005128205,
+        808.7868333333332
+      ],
+      "page_score": 5
+    },
+    {
+      "table_id": "p019_t01",
+      "page": 19,
+      "page_index_0": 18,
+      "keywords_matched": [],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.8833,
+      "headers": [
+        "6....14 x In",
+        "col_1",
+        "col_2",
+        "col_3"
+      ],
+      "rows": [
+        [
+          null,
+          "9....14 x In",
+          null,
+          null
+        ],
+        [
+          null,
+          null,
+          "6....13 x In",
+          null
+        ],
+        [
+          null,
+          null,
+          null,
+          "6....13 x In"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        269.99966666666677,
+        151.20500000000004,
+        548.8168788888889,
+        206.413
+      ],
+      "page_score": 5
+    },
+    {
+      "table_id": "p020_t03",
+      "page": 20,
+      "page_index_0": 19,
+      "keywords_matched": [],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9473,
+      "headers": [
+        "col_0",
+        "160A",
+        "LV516600",
+        "59400",
+        "LV516610",
+        "73640"
+      ],
+      "rows": [
+        [
+          "Breaking Capacity Icu as per IEC 60947-2",
+          "Rated Current",
+          "Three Pole Reference",
+          "Unit MRP [`]",
+          "Four Pole Reference",
+          "Unit MRP [`]"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.60314285714286,
+        330.20169999999996,
+        538.5148728,
+        361.43800000000005
+      ],
+      "page_score": 5
+    },
+    {
+      "table_id": "p020_t06",
+      "page": 20,
+      "page_index_0": 19,
+      "keywords_matched": [],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9473,
+      "headers": [
+        "col_0",
+        "160A",
+        "LV516620",
+        "61560",
+        "LV516630",
+        "76340"
+      ],
+      "rows": [
+        [
+          "Breaking Capacity Icu as per IEC 60947-2",
+          "Rated Current",
+          "Three Pole Reference",
+          "Unit MRP [`]",
+          "Four Pole Reference",
+          "Unit MRP [`]"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.60314285714286,
+        424.97439999999995,
+        538.5148728,
+        456.21000000000004
+      ],
+      "page_score": 5
+    },
+    {
+      "table_id": "p020_t10",
+      "page": 20,
+      "page_index_0": 19,
+      "keywords_matched": [],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9473,
+      "headers": [
+        "col_0",
+        "160A",
+        "LV516640",
+        "70780",
+        "LV516650",
+        "84380"
+      ],
+      "rows": [
+        [
+          "Breaking Capacity Icu as per IEC 60947-2",
+          "Rated Current",
+          "Three Pole Reference",
+          "Unit MRP [`]",
+          "Four Pole Reference",
+          "Unit MRP [`]"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.60314285714286,
+        541.2801999999999,
+        538.5148728,
+        572.5160000000001
+      ],
+      "page_score": 5
+    }
+  ],
+  "skipped_pages": []
+}

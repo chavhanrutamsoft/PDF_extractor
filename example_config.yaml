@@ -1,0 +1,41 @@
+# Example configuration — tune for your PDF (see ExtractionConfig in config.py).
+
+keywords:
+  - Rated Current
+  - Breaking Capacity
+  - MRP
+  - EasyPact CVS
+
+regex_patterns:
+  - "EasyPact\\s+CVS\\d*"
+
+match_mode: header_any
+header_row_count: 1
+min_keyword_hits: 1
+
+page_score_min: 0
+use_page_prefilter: true
+
+forward_fill_column_indices: [0]
+never_forward_fill_numeric_columns: true
+
+header_synonyms: {}
+
+table_settings:
+  vertical_strategy: lines
+  horizontal_strategy: lines
+  snap_tolerance: 3
+  join_tolerance: 3
+  edge_min_length: 3
+  min_words_vertical: 3
+  min_words_horizontal: 1
+  intersection_tolerance: 3
+  text_tolerance: 3
+
+use_camelot_fallback: false
+camelot_row_tol: 10
+camelot_edge_tol: 50
+
+run_word_qa: true
+multiline_join: " "
+drop_tables_with_no_data_rows: true

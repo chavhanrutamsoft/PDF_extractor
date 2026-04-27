@@ -1,0 +1,2917 @@
+{
+  "source_pdf": "Panel Builder_Pricelist.pdf",
+  "tables": [
+    {
+      "table_id": "p086_t01",
+      "page": 86,
+      "page_index_0": 85,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.909,
+      "headers": [
+        "Frame",
+        "[Ie] Rated operational current (Ue ≤ 440 V)",
+        "col_2",
+        "Motor Power at 415V, 3Ph, 50Hz",
+        "col_4",
+        "Auxiliary Contacts",
+        "col_6",
+        "Reference",
+        "Unit MRP [`]",
+        "col_9"
+      ],
+      "rows": [
+        [
+          "Frame",
+          "AC-1",
+          "AC-3",
+          "HP",
+          "kW",
+          "NO",
+          "NC",
+          null,
+          "M7 (220V)",
+          "N5 (415V)"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.502,
+        180.76599999999996,
+        538.8832696551724,
+        210.33559999999989
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p086_t02",
+      "page": 86,
+      "page_index_0": 85,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9105,
+      "headers": [
+        "Frame",
+        "[Ie] Rated operational current (Ue ≤ 440 V)",
+        "col_2",
+        "Motor Power at 415V, 3Ph, 50Hz",
+        "col_4",
+        "Auxiliary Contacts",
+        "col_6",
+        "Reference",
+        "Unit MRP [`]",
+        "col_9",
+        "col_10",
+        "col_11"
+      ],
+      "rows": [
+        [
+          "Frame",
+          "AC-1",
+          "AC-3",
+          "HP",
+          "kW",
+          "NO",
+          "NC",
+          null,
+          "M7 (220V)",
+          "N5 (415)",
+          "M5 (220V)",
+          "N7 (415)"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.502,
+        462.016,
+        538.8832696551724,
+        491.584
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p087_t01",
+      "page": 87,
+      "page_index_0": 86,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9071,
+      "headers": [
+        "Frame",
+        "[Ie] Rated operational current (Ue ≤ 440 V)",
+        "col_2",
+        "Motor Power at 415V, 3Ph, 50Hz",
+        "col_4",
+        "Auxiliary Contacts",
+        "col_6",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "Frame",
+          "AC-1",
+          "AC-3",
+          "HP",
+          "kW",
+          "NO",
+          "NC",
+          null,
+          "BD"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        57.64792307692308,
+        212.67399999999998,
+        550.2174420689655,
+        242.242
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p088_t01",
+      "page": 88,
+      "page_index_0": 87,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9912,
+      "headers": [
+        "Auxiliary Contacts",
+        "col_1",
+        "Reference",
+        "Unit MRP [`]",
+        "col_4",
+        "col_5",
+        "col_6"
+      ],
+      "rows": [
+        [
+          "NO",
+          "NC",
+          null,
+          "B5",
+          "F5",
+          "M5",
+          "N5"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.502,
+        297.68659999999994,
+        284.75966666666665,
+        331.37945454545456
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p091_t01",
+      "page": 91,
+      "page_index_0": 90,
+      "keywords_matched": [
+        "Breaking Capacity",
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.925,
+      "headers": [
+        "Breaking Capacity at 50 Hz",
+        "col_1",
+        "Thermal Protection Adjustment Range (A)",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "690 V",
+          "500 V",
+          null,
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.835,
+        206.76099999999997,
+        550.294194,
+        237.916
+      ],
+      "page_score": 2
+    },
+    {
+      "table_id": "p091_t02",
+      "page": 91,
+      "page_index_0": 90,
+      "keywords_matched": [
+        "Breaking Capacity",
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.925,
+      "headers": [
+        "Breaking Capacity at 50 Hz",
+        "col_1",
+        "Magnetic Protection (A)",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "690 V",
+          "500 V",
+          null,
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.835,
+        426.305,
+        550.294194,
+        460.30639999999994
+      ],
+      "page_score": 2
+    },
+    {
+      "table_id": "p096_t01",
+      "page": 96,
+      "page_index_0": 95,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.8579,
+      "headers": [
+        "No of Poles",
+        "AC Control Reference",
+        "Unit MRP [`]",
+        "col_3",
+        "col_4",
+        "col_5",
+        "DC Control Reference (4)",
+        "Unit MRP [`]",
+        "col_8",
+        "col_9"
+      ],
+      "rows": [
+        [
+          "No of Poles",
+          null,
+          "B7 (24V)",
+          "F7 (110V)",
+          "M7 (220V)",
+          "N7 (415V)",
+          null,
+          "BD (24V)",
+          "FD (110V)",
+          "MD (220V)"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.502,
+        155.615,
+        538.8010292857143,
+        183.94969999999995
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p096_t02",
+      "page": 96,
+      "page_index_0": 95,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.8124,
+      "headers": [
+        "No of Poles",
+        "DC low consumption Reference (1) (2) (3)",
+        "Unit MRP [`]",
+        "col_3",
+        "col_4"
+      ],
+      "rows": [
+        [
+          "No of Poles",
+          null,
+          "BW3 (24V)",
+          "EW3 (48V)",
+          "SW3 (72V)"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.502,
+        222.32600000000002,
+        538.8010292857143,
+        247.827
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p096_t03",
+      "page": 96,
+      "page_index_0": 95,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.815,
+      "headers": [
+        "Motor Power kW) at 380/415V",
+        "Auxiliary Contacts",
+        "AC Control Reference",
+        "Unit MRP [`]",
+        "col_4",
+        "col_5",
+        "col_6",
+        "DC Control Reference(5)",
+        "Unit MRP [`]",
+        "col_9",
+        "col_10"
+      ],
+      "rows": [
+        [
+          "Motor Power kW) at 380/415V",
+          null,
+          null,
+          "B7 (24V)",
+          "F7 (110V)",
+          "M7 (220V)",
+          "N7 (415V)",
+          null,
+          "BD (24V)",
+          "FD (110V)",
+          "MD (220V)"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.502,
+        420.931,
+        538.8010292857143,
+        449.265
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p096_t04",
+      "page": 96,
+      "page_index_0": 95,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.7385,
+      "headers": [
+        "Motor Power kW) at 380/415V",
+        "Auxiliary Contacts",
+        "AC Control Reference",
+        "Unit MRP [`]",
+        "col_4"
+      ],
+      "rows": [
+        [
+          "Motor Power kW) at 380/415V",
+          null,
+          null,
+          "F7 (110V)",
+          "M7 (220V)"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.502,
+        646.7280000000001,
+        538.8010292857143,
+        672.2293999999999
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p098_t01",
+      "page": 98,
+      "page_index_0": 97,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.7347,
+      "headers": [
+        "Nominal Reactive Power 440V",
+        "Auxiliary Contacts",
+        "Reference",
+        "Unit MRP [`]",
+        "col_4"
+      ],
+      "rows": [
+        [
+          "Nominal Reactive Power 440V",
+          null,
+          null,
+          "M7 (220V)",
+          "F7 (110V)"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.502,
+        170.72199999999998,
+        537.2578129411766,
+        207.55600000000004
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p099_t01",
+      "page": 99,
+      "page_index_0": 98,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.8579,
+      "headers": [
+        "No of Poles",
+        "AC Control Reference",
+        "Unit MRP [`]",
+        "col_3",
+        "col_4",
+        "col_5",
+        "DC Control Reference (4)",
+        "Unit MRP [`]",
+        "col_8",
+        "col_9"
+      ],
+      "rows": [
+        [
+          "No of Poles",
+          null,
+          "B7 (24V)",
+          "F7 (110V)",
+          "M7 (220V)",
+          "N7 (415V)",
+          null,
+          "BD (24V)",
+          "FD (110V)",
+          "MD (220V)"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.835,
+        217.44299999999998,
+        549.8490328,
+        248.61099999999996
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p099_t02",
+      "page": 99,
+      "page_index_0": 98,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.81,
+      "headers": [
+        "No of Poles",
+        "DC low consumption Reference (1) (2) (3)",
+        "Unit MRP [`]",
+        "col_3",
+        "col_4"
+      ],
+      "rows": [
+        [
+          "No of Poles",
+          null,
+          "BL (24V)",
+          "FL (110V)",
+          "ML (220V)"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.835,
+        281.32000000000005,
+        549.8490328,
+        312.488
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p099_t03",
+      "page": 99,
+      "page_index_0": 98,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.7519,
+      "headers": [
+        "AC-1 Rated Operational Current [Ie]",
+        "AC-3 Duty",
+        "col_2",
+        "col_3",
+        "Auxiliary Contacts",
+        "AC Control Reference",
+        "Unit MRP [`]",
+        "col_7",
+        "col_8"
+      ],
+      "rows": [
+        [
+          "AC-1 Rated Operational Current [Ie]",
+          "kW",
+          "HP",
+          "A",
+          null,
+          null,
+          "M7 (220V)",
+          "N7 (415V)",
+          "F7 (110V)"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.835,
+        508.892,
+        549.8490328,
+        542.893
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p100_t01",
+      "page": 100,
+      "page_index_0": 99,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.7346,
+      "headers": [
+        "AC-1 Rated Operational Current [Ie]",
+        "Motor Power (Long Life) AC3",
+        "col_2",
+        "col_3",
+        "Auxiliary Contacts",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "AC-1 Rated Operational Current [Ie]",
+          "kW",
+          "HP",
+          "A",
+          null,
+          null,
+          "BL (24V)"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.501999999999995,
+        109.25300000000004,
+        538.2825573913044,
+        138.82157142857145
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p100_t02",
+      "page": 100,
+      "page_index_0": 99,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.7257,
+      "headers": [
+        "[Ie] Rated Operational Current AC1",
+        "Poles Composotion",
+        "AC control Reference",
+        "Unit MRP [`] M7 (220V)",
+        "DC control Reference",
+        "Unit MRP [`]",
+        "col_6",
+        "col_7"
+      ],
+      "rows": [
+        [
+          "[Ie] Rated Operational Current AC1",
+          null,
+          null,
+          null,
+          null,
+          "BD (24V)",
+          "FD (110V)",
+          "MD (220V)"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.501999999999995,
+        316.995,
+        538.2825573913044,
+        344.826
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p107_t01",
+      "page": 107,
+      "page_index_0": 106,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.8034,
+      "headers": [
+        "AC-1 Rated Operational Current [Ie]",
+        "AC3 Duty (Long Life)",
+        "col_2",
+        "col_3",
+        "Auxiliary Contacts",
+        "Reference",
+        "Unit MRP [`]",
+        "col_7",
+        "col_8",
+        "col_9",
+        "col_10"
+      ],
+      "rows": [
+        [
+          "AC-1 Rated Operational Current [Ie]",
+          "kW",
+          "HP",
+          "A",
+          null,
+          null,
+          "BBE (24V DC)",
+          "BNE (24-60V AC/DC)",
+          "EHE (48-130V AC/DC)",
+          "KUE (100-250V AC/DC)",
+          "LSE (200-500V AC/DC)"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.83500000000001,
+        214.67100000000005,
+        549.616687826087,
+        251.43672727272727
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p107_t02",
+      "page": 107,
+      "page_index_0": 106,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.8032,
+      "headers": [
+        "[Ie] Rated Operational Current AC-1",
+        "Poles Composotion",
+        "Auxiliary Contacts",
+        "AC & DC Control Reference",
+        "Unit MRP [`]",
+        "col_5",
+        "col_6",
+        "col_7",
+        "col_8"
+      ],
+      "rows": [
+        [
+          "[Ie] Rated Operational Current AC-1",
+          null,
+          null,
+          null,
+          "BBE (24V DC)",
+          "BNE (24-60V AC/DC)",
+          "EHE (48-130V AC/DC)",
+          "KUE (100-250V AC/DC)",
+          "LSE (200-500V AC/DC)"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.83500000000001,
+        451.92600000000004,
+        549.616687826087,
+        488.69155555555557
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p110_t02",
+      "page": 110,
+      "page_index_0": 109,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.8703,
+      "headers": [
+        "Description",
+        "For use with",
+        "Reference",
+        "Unit MRP [`]",
+        "col_4",
+        "col_5",
+        "col_6"
+      ],
+      "rows": [
+        [
+          "Description",
+          null,
+          null,
+          "B (24V) (AC/DC)",
+          "E (42/48V) (AC/DC)",
+          "F (110/127V) (AC/DC)",
+          "M (220/240V) (AC/DC)"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.502,
+        180.79700000000003,
+        538.0059914285714,
+        228.89657142857146
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p117_t02",
+      "page": 117,
+      "page_index_0": 116,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.6132,
+      "headers": [
+        "[Ie] Rated Operational Current AC-1",
+        "Motor Power (Long Life) AC-3 kW (@415V) A",
+        "Standard version Reference",
+        "Unit MRP [`]",
+        "col_4"
+      ],
+      "rows": [
+        [
+          "[Ie] Rated Operational Current AC-1",
+          "kW (@415V)",
+          null,
+          "EHEN (48-130 V)",
+          "KUEN (100-250 V)"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.901666666666664,
+        439.76,
+        550.0097340740741,
+        469.328
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p117_t03",
+      "page": 117,
+      "page_index_0": 116,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.6276,
+      "headers": [
+        "[Ie] Rated Operational Current AC-1",
+        "Power Pole Composition",
+        "Standard version Reference",
+        "Unit MRP [`]",
+        "col_4"
+      ],
+      "rows": [
+        [
+          "[Ie] Rated Operational Current AC-1",
+          null,
+          null,
+          "EHEN (48-130 V)",
+          "KUEN (100-250 V)"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.901666666666664,
+        598.612,
+        550.0097340740741,
+        628.18
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p119_t03",
+      "page": 119,
+      "page_index_0": 118,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.6864,
+      "headers": [
+        "Pole Composition",
+        "Control modules for Standard contactors",
+        "Reference",
+        "Unit MRP [`]",
+        "col_4"
+      ],
+      "rows": [
+        [
+          "Pole Composition",
+          null,
+          null,
+          "EHEN (48-130V)",
+          "KUEN (100-250V)"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.835,
+        443.598,
+        549.6167313043478,
+        473.16639999999995
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p127_t01",
+      "page": 127,
+      "page_index_0": 126,
+      "keywords_matched": [
+        "Breaking Capacity",
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9548,
+      "headers": [
+        "Breaking Capacity at 50Hz",
+        "col_1",
+        "Magnetic Protection Rating (A)",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "690V",
+          "500V",
+          null,
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.835,
+        194.25599999999997,
+        296.094,
+        233.92379999999997
+      ],
+      "page_score": 2
+    },
+    {
+      "table_id": "p127_t02",
+      "page": 127,
+      "page_index_0": 126,
+      "keywords_matched": [
+        "Breaking Capacity",
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9601,
+      "headers": [
+        "Breaking Capacity at 50Hz",
+        "col_1",
+        "Thermal Protection Adjustment Range",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "690V",
+          "500V",
+          null,
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        310.261,
+        194.25599999999997,
+        550.3659941935483,
+        233.92379999999997
+      ],
+      "page_score": 2
+    },
+    {
+      "table_id": "p127_t03",
+      "page": 127,
+      "page_index_0": 126,
+      "keywords_matched": [
+        "Breaking Capacity",
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.7529,
+      "headers": [
+        "Breaking Capacity at 415V 50Hz",
+        "Motor Power AC-3**",
+        "col_2",
+        "Thermal Protection Adjustment Range",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "Breaking Capacity at 415V 50Hz",
+          "kW",
+          "HP",
+          null,
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.835,
+        611.095,
+        296.094,
+        652.1947142857143
+      ],
+      "page_score": 2
+    },
+    {
+      "table_id": "p148_t02",
+      "page": 148,
+      "page_index_0": 147,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9638,
+      "headers": [
+        "KW",
+        "col_1",
+        "Max. Continuous Current (A)",
+        "col_3",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "ND",
+          "HD",
+          "ND",
+          "HD",
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.502,
+        533.773,
+        538.61757,
+        554.4516666666667
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p151_t01",
+      "page": 151,
+      "page_index_0": 150,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9798,
+      "headers": [
+        "kW",
+        "col_1",
+        "Max. continuous current(A)",
+        "col_3",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "ND",
+          "HD",
+          "ND",
+          "HD",
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.835,
+        236.99300000000005,
+        549.48481,
+        259.6613333333333
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p154_t02",
+      "page": 154,
+      "page_index_0": 153,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9295,
+      "headers": [
+        "Nominal Power in kW",
+        "col_1",
+        "col_2",
+        "Nominal Current (Amps)",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "230 Vac",
+          "400 Vac",
+          "440 Vac",
+          null,
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.502,
+        398.996,
+        538.7220303703704,
+        432.0025
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p171_t01",
+      "page": 171,
+      "page_index_0": 170,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9098,
+      "headers": [
+        "Description",
+        "Range",
+        "Voltage",
+        "Output",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "Description",
+          "-",
+          "208…480Vac",
+          "1CO, 5A",
+          "RM10TG00N",
+          "2071"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.835,
+        236.04899999999998,
+        548.5921070588236,
+        277.3254545454546
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p171_t02",
+      "page": 171,
+      "page_index_0": 170,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9964,
+      "headers": [
+        "Description",
+        "Range",
+        "Voltage",
+        "Output",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "Description",
+          "0…30hrs",
+          "240VAC or 24VAC/DC",
+          "1CO, 5A",
+          "RE10RAMUN",
+          "1417"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.835,
+        530.909,
+        548.5921070588236,
+        567.7439999999999
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p191_t01",
+      "page": 191,
+      "page_index_0": 190,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.881,
+      "headers": [
+        "Description",
+        "Dimension wxhxd (mm)",
+        "Cable Gland type ISO standard",
+        "Number of Cut outs",
+        "Number of rows",
+        "col_5",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "Description",
+          null,
+          null,
+          null,
+          "Vertical",
+          "Horizontal",
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.835,
+        98.62800000000004,
+        549.6167747826087,
+        129.79575000000006
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p210_t01",
+      "page": 210,
+      "page_index_0": 209,
+      "keywords_matched": [
+        "Rated Current",
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 1.0,
+      "headers": [
+        "[In] Rated Current (A)",
+        "1 Pole Reference",
+        "Unit MRP [`]",
+        "2 Pole Reference",
+        "Unit MRP [`]",
+        "3 Pole Reference",
+        "Unit MRP [`]",
+        "4 Pole Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "Module Width**",
+          "1 mod",
+          null,
+          "2 mod",
+          null,
+          "3 mod",
+          null,
+          "4 mod",
+          null
+        ],
+        [
+          "MOQ",
+          "12 Nos.",
+          null,
+          "6 Nos.",
+          null,
+          "4 Nos.",
+          null,
+          "3 Nos.",
+          null
+        ],
+        [
+          "B curve",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          "6",
+          "A9N1P06BGN (cid:2)",
+          "535",
+          "A9N2P06BGN (cid:2)",
+          "1615",
+          "A9N3P06BGN (cid:2)",
+          "2678",
+          "A9N4P06BGN",
+          "3421"
+        ],
+        [
+          "10",
+          "A9N1P10BGN (cid:2)",
+          "535",
+          "A9N2P10BGN (cid:2)",
+          "1615",
+          "A9N3P10BGN (cid:2)",
+          "2678",
+          "-",
+          "-"
+        ],
+        [
+          "16",
+          "A9N1P16BGN (cid:2)",
+          "535",
+          "A9N2P16BGN (cid:2)",
+          "1615",
+          "A9N3P16BGN (cid:2)",
+          "2678",
+          "A9N4P16BGN",
+          "3421"
+        ],
+        [
+          "20",
+          "A9N1P20BGN (cid:2)",
+          "535",
+          "A9N2P20BGN (cid:2)",
+          "1615",
+          "A9N3P20BGN",
+          "2678",
+          "-",
+          "-"
+        ],
+        [
+          "25",
+          "A9N1P25BGN (cid:2)",
+          "535",
+          "A9N2P25BGN",
+          "1615",
+          "A9N3P25BGN (cid:2)",
+          "2678",
+          "-",
+          "-"
+        ],
+        [
+          "32",
+          "A9N1P32BGN (cid:2)",
+          "535",
+          "A9N2P32BGN",
+          "1615",
+          "A9N3P32BGN (cid:2)",
+          "2678",
+          "A9N4P32BGN",
+          "3421"
+        ],
+        [
+          "40",
+          "A9N1P40BGN (cid:2)",
+          "1161",
+          "A9N2P40BGN",
+          "3506",
+          "A9N3P40BGN",
+          "3655",
+          "A9N4P40BGN",
+          "5195"
+        ],
+        [
+          "50",
+          "A9N1P50BGN",
+          "1161",
+          "-",
+          "-",
+          "A9N3P50BGN",
+          "3655",
+          "-",
+          "-"
+        ],
+        [
+          "63",
+          "A9N1P63BGN (cid:2)",
+          "1177",
+          "-",
+          "-",
+          "A9N3P63BGN (cid:2)",
+          "4114",
+          "A9N4P63BGN",
+          "5243"
+        ],
+        [
+          "C curve",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          "1",
+          "A9N1P01CGN (cid:2)",
+          "820",
+          "A9N2P01CGN (cid:2)",
+          "2235",
+          "A9N3P01CGN (cid:2)",
+          "3528",
+          "A9N4P01CGN (cid:2)",
+          "4440"
+        ],
+        [
+          "2",
+          "A9N1P02CGN (cid:2)",
+          "820",
+          "A9N2P02CGN",
+          "2235",
+          "A9N3P02CGN (cid:2)",
+          "3528",
+          "A9N4P02CGN (cid:2)",
+          "4440"
+        ],
+        [
+          "3",
+          "A9N1P03CGN (cid:2)",
+          "820",
+          "A9N2P03CGN (cid:2)",
+          "2235",
+          "A9N3P03CGN (cid:2)",
+          "3528",
+          "-",
+          "-"
+        ],
+        [
+          "4",
+          "A9N1P04CGN (cid:2)",
+          "820",
+          "A9N2P04CGN (cid:2)",
+          "2235",
+          "A9N3P04CGN (cid:2)",
+          "3528",
+          "A9N4P04CGN (cid:2)",
+          "4440"
+        ],
+        [
+          "6",
+          "A9N1P06CGN (cid:2)",
+          "486",
+          "A9N2P06CGN (cid:2)",
+          "1615",
+          "A9N3P06CGN (cid:2)",
+          "2678",
+          "A9N4P06CGN (cid:2)",
+          "3609"
+        ],
+        [
+          "10",
+          "A9N1P10CGN (cid:2)",
+          "486",
+          "A9N2P10CGN (cid:2)",
+          "1615",
+          "A9N3P10CGN (cid:2)",
+          "2678",
+          "A9N4P10CGN (cid:2)",
+          "3609"
+        ],
+        [
+          "16",
+          "A9N1P16CGN (cid:2)",
+          "486",
+          "A9N2P16CGN (cid:2)",
+          "1615",
+          "A9N3P16CGN (cid:2)",
+          "2678",
+          "A9N4P16CGN (cid:2)",
+          "3609"
+        ],
+        [
+          "20",
+          "A9N1P20CGN (cid:2)",
+          "486",
+          "A9N2P20CGN (cid:2)",
+          "1615",
+          "A9N3P20CGN (cid:2)",
+          "2678",
+          "A9N4P20CGN (cid:2)",
+          "3609"
+        ],
+        [
+          "25",
+          "A9N1P25CGN (cid:2)",
+          "486",
+          "A9N2P25CGN (cid:2)",
+          "1615",
+          "A9N3P25CGN (cid:2)",
+          "2678",
+          "A9N4P25CGN (cid:2)",
+          "3609"
+        ],
+        [
+          "32",
+          "A9N1P32CGN (cid:2)",
+          "486",
+          "A9N2P32CGN (cid:2)",
+          "1615",
+          "A9N3P32CGN (cid:2)",
+          "2678",
+          "A9N4P32CGN (cid:2)",
+          "3609"
+        ],
+        [
+          "40",
+          "A9N1P40CGN (cid:2)",
+          "1161",
+          "A9N2P40CGN (cid:2)",
+          "2599",
+          "A9N3P40CGN (cid:2)",
+          "4079",
+          "A9N4P40CGN (cid:2)",
+          "5243"
+        ],
+        [
+          "50",
+          "A9N1P50CGN",
+          "1161",
+          "A9N2P50CGN",
+          "2599",
+          "A9N3P50CGN",
+          "4079",
+          "A9N4P50CGN",
+          "5243"
+        ],
+        [
+          "63",
+          "A9N1P63CGN (cid:2)",
+          "1177",
+          "A9N2P63CGN (cid:2)",
+          "2621",
+          "A9N3P63CGN (cid:2)",
+          "4214",
+          "A9N4P63CGN (cid:2)",
+          "5460"
+        ],
+        [
+          "D curve",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          "2",
+          "A9N1P02DGN (cid:2)",
+          "828",
+          "A9N2P02DGN (cid:2)",
+          "2259",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "3",
+          "A9N1P03DGN (cid:2)",
+          "828",
+          "A9N2P03DGN",
+          "2259",
+          "A9N3P03DGN (cid:2)",
+          "3582",
+          "-",
+          "-"
+        ],
+        [
+          "4",
+          "A9N1P04DGN (cid:2)",
+          "828",
+          "A9N2P04DGN (cid:2)",
+          "2259",
+          "A9N3P04DGN (cid:2)",
+          "3582",
+          "-",
+          "-"
+        ],
+        [
+          "6",
+          "A9N1P06DGN (cid:2)",
+          "698",
+          "A9N2P06DGN (cid:2)",
+          "1692",
+          "A9N3P06DGN (cid:2)",
+          "2821",
+          "-",
+          "-"
+        ],
+        [
+          "10",
+          "A9N1P10DGN (cid:2)",
+          "698",
+          "A9N2P10DGN (cid:2)",
+          "1692",
+          "A9N3P10DGN (cid:2)",
+          "2821",
+          "-",
+          "-"
+        ],
+        [
+          "16",
+          "A9N1P16DGN (cid:2)",
+          "698",
+          "A9N2P16DGN (cid:2)",
+          "1692",
+          "A9N3P16DGN (cid:2)",
+          "2821",
+          "A9N4P16DGN (cid:2)",
+          "3742"
+        ],
+        [
+          "20",
+          "A9N1P20DGN (cid:2)",
+          "698",
+          "A9N2P20DGN (cid:2)",
+          "1692",
+          "A9N3P20DGN (cid:2)",
+          "2821",
+          "A9N4P20DGN (cid:2)",
+          "3742"
+        ],
+        [
+          "25",
+          "A9N1P25DGN (cid:2)",
+          "698",
+          "A9N2P25DGN (cid:2)",
+          "1692",
+          "A9N3P25DGN (cid:2)",
+          "2821",
+          "A9N4P25DGN (cid:2)",
+          "3742"
+        ],
+        [
+          "32",
+          "A9N1P32DGN (cid:2)",
+          "698",
+          "A9N2P32DGN (cid:2)",
+          "1692",
+          "A9N3P32DGN (cid:2)",
+          "2821",
+          "A9N4P32DGN (cid:2)",
+          "3742"
+        ],
+        [
+          "40",
+          "A9N1P40DGN (cid:2)",
+          "1254",
+          "A9N2P40DGN (cid:2)",
+          "2747",
+          "A9N3P40DGN (cid:2)",
+          "4322",
+          "A9N4P40DGN (cid:2)",
+          "5419"
+        ],
+        [
+          "50",
+          "-",
+          "-",
+          "-",
+          "-",
+          "A9N3P50DGN",
+          "4322",
+          "-",
+          "-"
+        ],
+        [
+          "63",
+          "A9N1P63DGN (cid:2)",
+          "1268",
+          "A9N2P63DGN (cid:2)",
+          "2780",
+          "A9N3P63DGN (cid:2)",
+          "4360",
+          "A9N4P63DGN (cid:2)",
+          "5475"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.502,
+        198.50599999999997,
+        539.9018619230769,
+        677.3521111111111
+      ],
+      "page_score": 2
+    },
+    {
+      "table_id": "p211_t01",
+      "page": 211,
+      "page_index_0": 210,
+      "keywords_matched": [
+        "Rated Current",
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9996,
+      "headers": [
+        "[In] Rated Current (A)",
+        "1 Pole Reference",
+        "Unit MRP [`]",
+        "2 Pole Reference",
+        "Unit MRP [`]",
+        "3 Pole Reference",
+        "Unit MRP [`]",
+        "4 Pole Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "Module Width**",
+          "1 mod",
+          null,
+          "2 mod",
+          null,
+          "3 mod",
+          null,
+          "4 mod",
+          null
+        ],
+        [
+          "MOQ",
+          "12 Nos.",
+          null,
+          "6 Nos.",
+          null,
+          "4 Nos.",
+          null,
+          "3 Nos.",
+          null
+        ],
+        [
+          "B curve",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          "6",
+          "A9N1P06BIN (cid:2)",
+          "551",
+          "A9N2P06BIN (cid:2)",
+          "1662",
+          "A9N3P06BIN (cid:2)",
+          "2759",
+          "-",
+          "-"
+        ],
+        [
+          "10",
+          "A9N1P10BIN (cid:2)",
+          "551",
+          "A9N2P10BIN (cid:2)",
+          "1662",
+          "A9N3P10BIN (cid:2)",
+          "2759",
+          "-",
+          "-"
+        ],
+        [
+          "16",
+          "A9N1P16BIN (cid:2)",
+          "551",
+          "A9N2P16BIN (cid:2)",
+          "1662",
+          "A9N3P16BIN (cid:2)",
+          "2759",
+          "-",
+          "-"
+        ],
+        [
+          "20",
+          "A9N1P20BIN (cid:2)",
+          "551",
+          "A9N2P20BIN (cid:2)",
+          "1662",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "25",
+          "A9N1P25BIN (cid:2)",
+          "551",
+          "-",
+          "-",
+          "A9N3P25BIN (cid:2)",
+          "2759",
+          "-",
+          "-"
+        ],
+        [
+          "32",
+          "A9N1P32BIN (cid:2)",
+          "551",
+          "-",
+          "-",
+          "A9N3P32BIN (cid:2)",
+          "2759",
+          "A9N4P32BIN (cid:2)",
+          "3718"
+        ],
+        [
+          "40",
+          "A9N1P40BIN (cid:2)",
+          "1196",
+          "-",
+          "-",
+          "-",
+          "-",
+          "A9N4P40BIN (cid:2)",
+          "5351"
+        ],
+        [
+          "63",
+          "A9N1P63BIN (cid:2)",
+          "1212",
+          "-",
+          "-",
+          "A9N3P63BIN (cid:2)",
+          "4238",
+          "A9N4P63BIN (cid:2)",
+          "5401"
+        ],
+        [
+          "C curve",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          "1",
+          "A9N1P01CIN (cid:2)",
+          "845",
+          "A9N2P01CIN (cid:2)",
+          "2303",
+          "A9N3P01CIN (cid:2)",
+          "3634",
+          "A9N4P01CIN (cid:2)",
+          "4573"
+        ],
+        [
+          "2",
+          "A9N1P02CIN (cid:2)",
+          "845",
+          "A9N2P02CIN (cid:2)",
+          "2303",
+          "A9N3P02CIN (cid:2)",
+          "3634",
+          "A9N4P02CIN (cid:2)",
+          "4573"
+        ],
+        [
+          "3",
+          "A9N1P03CIN (cid:2)",
+          "845",
+          "A9N2P03CIN (cid:2)",
+          "2303",
+          "A9N3P03CIN (cid:2)",
+          "3634",
+          "-",
+          "-"
+        ],
+        [
+          "4",
+          "A9N1P04CIN (cid:2)",
+          "845",
+          "A9N2P04CIN (cid:2)",
+          "2303",
+          "A9N3P04CIN (cid:2)",
+          "3634",
+          "A9N4P04CIN (cid:2)",
+          "4573"
+        ],
+        [
+          "6",
+          "A9N1P06CIN (cid:2)",
+          "501",
+          "A9N2P06CIN (cid:2)",
+          "1662",
+          "A9N3P06CIN (cid:2)",
+          "2759",
+          "A9N4P06CIN (cid:2)",
+          "3718"
+        ],
+        [
+          "10",
+          "A9N1P10CIN (cid:2)",
+          "501",
+          "A9N2P10CIN (cid:2)",
+          "1662",
+          "A9N3P10CIN (cid:2)",
+          "2759",
+          "A9N4P10CIN (cid:2)",
+          "3718"
+        ],
+        [
+          "16",
+          "A9N1P16CIN (cid:2)",
+          "501",
+          "A9N2P16CIN (cid:2)",
+          "1662",
+          "A9N3P16CIN (cid:2)",
+          "2759",
+          "A9N4P16CIN (cid:2)",
+          "3718"
+        ],
+        [
+          "20",
+          "A9N1P20CIN (cid:2)",
+          "501",
+          "A9N2P20CIN (cid:2)",
+          "1662",
+          "A9N3P20CIN (cid:2)",
+          "2759",
+          "A9N4P20CIN (cid:2)",
+          "3718"
+        ],
+        [
+          "25",
+          "A9N1P25CIN (cid:2)",
+          "501",
+          "A9N2P25CIN (cid:2)",
+          "1662",
+          "A9N3P25CIN (cid:2)",
+          "2759",
+          "A9N4P25CIN (cid:2)",
+          "3718"
+        ],
+        [
+          "32",
+          "A9N1P32CIN (cid:2)",
+          "501",
+          "A9N2P32CIN (cid:2)",
+          "1662",
+          "A9N3P32CIN (cid:2)",
+          "2759",
+          "A9N4P32CIN (cid:2)",
+          "3718"
+        ],
+        [
+          "40",
+          "A9N1P40CIN (cid:2)",
+          "1196",
+          "A9N2P40CIN (cid:2)",
+          "2677",
+          "A9N3P40CIN (cid:2)",
+          "4201",
+          "A9N4P40CIN (cid:2)",
+          "5401"
+        ],
+        [
+          "50",
+          "A9N1P50CIN",
+          "1196",
+          "A9N2P50CIN",
+          "2677",
+          "A9N3P50CIN",
+          "4201",
+          "A9N4P50CIN",
+          "5401"
+        ],
+        [
+          "63",
+          "A9N1P63CIN (cid:2)",
+          "1212",
+          "A9N2P63CIN (cid:2)",
+          "2702",
+          "A9N3P63CIN (cid:2)",
+          "4341",
+          "A9N4P63CIN (cid:2)",
+          "5625"
+        ],
+        [
+          "D curve",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          "2",
+          "A9N1P02DIN (cid:2)",
+          "852",
+          "A9N2P02DIN (cid:2)",
+          "2327",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "3",
+          "A9N1P03DIN (cid:2)",
+          "852",
+          "-",
+          "-",
+          "A9N3P03DIN (cid:2)",
+          "3690",
+          "-",
+          "-"
+        ],
+        [
+          "4",
+          "A9N1P04DIN (cid:2)",
+          "852",
+          "A9N2P04DIN (cid:2)",
+          "2327",
+          "A9N3P04DIN (cid:2)",
+          "3690",
+          "-",
+          "-"
+        ],
+        [
+          "6",
+          "A9N1P06DIN (cid:2)",
+          "719",
+          "A9N2P06DIN (cid:2)",
+          "1744",
+          "A9N3P06DIN (cid:2)",
+          "2907",
+          "-",
+          "-"
+        ],
+        [
+          "10",
+          "A9N1P10DIN (cid:2)",
+          "719",
+          "A9N2P10DIN (cid:2)",
+          "1744",
+          "A9N3P10DIN (cid:2)",
+          "2907",
+          "-",
+          "-"
+        ],
+        [
+          "16",
+          "A9N1P16DIN (cid:2)",
+          "719",
+          "A9N2P16DIN (cid:2)",
+          "1744",
+          "A9N3P16DIN (cid:2)",
+          "2907",
+          "A9N4P16DIN (cid:2)",
+          "3855"
+        ],
+        [
+          "20",
+          "A9N1P20DIN (cid:2)",
+          "719",
+          "A9N2P20DIN (cid:2)",
+          "1744",
+          "A9N3P20DIN (cid:2)",
+          "2907",
+          "A9N4P20DIN (cid:2)",
+          "3855"
+        ],
+        [
+          "25",
+          "A9N1P25DIN (cid:2)",
+          "719",
+          "A9N2P25DIN (cid:2)",
+          "1744",
+          "A9N3P25DIN (cid:2)",
+          "2907",
+          "A9N4P25DIN (cid:2)",
+          "3855"
+        ],
+        [
+          "32",
+          "A9N1P32DIN (cid:2)",
+          "719",
+          "A9N2P32DIN (cid:2)",
+          "1744",
+          "A9N3P32DIN (cid:2)",
+          "2907",
+          "A9N4P32DIN (cid:2)",
+          "3855"
+        ],
+        [
+          "40",
+          "A9N1P40DIN (cid:2)",
+          "1292",
+          "A9N2P40DIN (cid:2)",
+          "2830",
+          "A9N3P40DIN (cid:2)",
+          "4452",
+          "A9N4P40DIN (cid:2)",
+          "5583"
+        ],
+        [
+          "50",
+          "-",
+          "-",
+          "-",
+          "-",
+          "A9N3P50DIN",
+          "4452",
+          "A9N4P50DIN",
+          "5583"
+        ],
+        [
+          "63",
+          "A9N1P63DIN",
+          "1306",
+          "A9N2P63DIN (cid:2)",
+          "2864",
+          "A9N3P63DIN (cid:2)",
+          "4491",
+          "A9N4P63DIN (cid:2)",
+          "5639"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.835,
+        221.17399999999998,
+        551.2106631372549,
+        688.684777777778
+      ],
+      "page_score": 2
+    },
+    {
+      "table_id": "p212_t01",
+      "page": 212,
+      "page_index_0": 211,
+      "keywords_matched": [
+        "Rated Current",
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9242,
+      "headers": [
+        "[In] Rated Current (A)",
+        "Module Width 18mm/ module",
+        "1 Pole Reference",
+        "Unit MRP [`]",
+        "Module Width 18mm/ module",
+        "2 Pole Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "MOQ",
+          null,
+          "12 Nos.",
+          null,
+          null,
+          "6 Nos.",
+          null
+        ],
+        [
+          "C60H-DC",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.502,
+        167.198,
+        538.1505827272728,
+        211.67937500000005
+      ],
+      "page_score": 2
+    },
+    {
+      "table_id": "p214_t01",
+      "page": 214,
+      "page_index_0": 213,
+      "keywords_matched": [
+        "Rated Current",
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.7658,
+      "headers": [
+        "[In] Rated Current (A)",
+        "Earth-Leakage Sensitivity (mA)",
+        "Module Width 18mm/module",
+        "2 Pole Reference",
+        "Unit MRP [`]",
+        "Module Width 18mm/module",
+        "4 Pole Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "25",
+          "30",
+          "2",
+          "A9N16201",
+          "5571",
+          "4",
+          "A9N16251",
+          "7819"
+        ],
+        [
+          "[In] Rated Current (A)",
+          "100",
+          "2",
+          "A9N16203",
+          "6183",
+          "4",
+          "A9N16253",
+          "8310"
+        ],
+        [
+          "[In] Rated Current (A)",
+          "300",
+          "2",
+          "A9N16202",
+          "6371",
+          "4",
+          "A9N16252",
+          "8555"
+        ],
+        [
+          "40",
+          "30",
+          "2",
+          "A9N16204",
+          "6558",
+          "4",
+          "A9N16254",
+          "7697"
+        ],
+        [
+          "[In] Rated Current (A)",
+          "100",
+          "2",
+          "A9N16205",
+          "7070",
+          "4",
+          "A9N16255",
+          "8356"
+        ],
+        [
+          "[In] Rated Current (A)",
+          "300",
+          "2",
+          "A9N16206",
+          "7415",
+          "4",
+          "A9N16256",
+          "8678"
+        ],
+        [
+          "63",
+          "30",
+          "2",
+          "A9N16208",
+          "7897",
+          "4",
+          "A9N16258",
+          "8913"
+        ],
+        [
+          "[In] Rated Current (A)",
+          "100",
+          "2",
+          "A9N16209",
+          "8492",
+          "4",
+          "A9N16259",
+          "9872"
+        ],
+        [
+          "[In] Rated Current (A)",
+          "300",
+          "2",
+          "A9N16210",
+          "8663",
+          "4",
+          "A9N16260",
+          "9918"
+        ],
+        [
+          "80",
+          "30",
+          "2",
+          "A9N16212",
+          "13274",
+          "4",
+          "A9N16261",
+          "15723"
+        ],
+        [
+          "[In] Rated Current (A)",
+          "100",
+          "2",
+          "A9N16213",
+          "13496",
+          "4",
+          "A9N16262",
+          "15976"
+        ],
+        [
+          "[In] Rated Current (A)",
+          "300",
+          "2",
+          "-",
+          "-",
+          "4",
+          "A9N16263",
+          "16062"
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.502,
+        179.80600000000004,
+        539.3310505555556,
+        328.28541176470594
+      ],
+      "page_score": 2
+    },
+    {
+      "table_id": "p217_t01",
+      "page": 217,
+      "page_index_0": 216,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9796,
+      "headers": [
+        "Type",
+        "Module Width 18mm/module",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "Indication Auxiliaries",
+          null,
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.835,
+        257.88300000000004,
+        549.8490328,
+        291.88475
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p223_t02",
+      "page": 223,
+      "page_index_0": 222,
+      "keywords_matched": [
+        "Rated Current",
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9091,
+      "headers": [
+        "[In] Rated Current (A)",
+        "2 Pole Reference",
+        "Unit MRP [`]",
+        "3 Pole Reference",
+        "Unit MRP [`]",
+        "4 Pole Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "Module Width **",
+          "4.5 mod",
+          null,
+          "5.5 mod",
+          null,
+          "6.5 mod",
+          null
+        ],
+        [
+          "B Curve",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.83500000000001,
+        388.116,
+        549.124241,
+        433.45275
+      ],
+      "page_score": 2
+    },
+    {
+      "table_id": "p237_t02",
+      "page": 237,
+      "page_index_0": 236,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9987,
+      "headers": [
+        "Description",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "Busbars",
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.83500000000001,
+        411.127,
+        550.432650625,
+        445.1267500000001
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p242_t01",
+      "page": 242,
+      "page_index_0": 241,
+      "keywords_matched": [
+        "Rated Current",
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9509,
+      "headers": [
+        "[In] Rated Current (A)",
+        "[Ue] Rated Operational Voltage (V)",
+        "Poles Description",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "PratiKa Screw",
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          "IP44",
+          null,
+          null,
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.502,
+        151.10699999999997,
+        539.2220829411765,
+        196.4394999999998
+      ],
+      "page_score": 2
+    },
+    {
+      "table_id": "p242_t02",
+      "page": 242,
+      "page_index_0": 241,
+      "keywords_matched": [
+        "Rated Current",
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.948,
+      "headers": [
+        "[In] Rated Current (A)",
+        "[Ue] Rated Operational Voltage (V)",
+        "Poles Description",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "IP44",
+          null,
+          null,
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.502,
+        569.494,
+        539.2220829411765,
+        603.4933333333335
+      ],
+      "page_score": 2
+    },
+    {
+      "table_id": "p243_t02",
+      "page": 243,
+      "page_index_0": 242,
+      "keywords_matched": [
+        "Rated Current",
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9509,
+      "headers": [
+        "[In] Rated Current (A)",
+        "[Ue] Rated Operational Voltage (V)",
+        "Poles Description",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "PratiKa Screw",
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          "IP44",
+          null,
+          null,
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.835,
+        362.721,
+        550.046734074074,
+        408.05316666666675
+      ],
+      "page_score": 2
+    },
+    {
+      "table_id": "p244_t01",
+      "page": 244,
+      "page_index_0": 243,
+      "keywords_matched": [
+        "Rated Current",
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9509,
+      "headers": [
+        "[In] Rated Current (A)",
+        "[Ue] Rated Operational Voltage (V)",
+        "Poles Description",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "PratiKa Screw",
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          "IP44",
+          null,
+          null,
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.502,
+        167.21299999999997,
+        539.3311894444445,
+        208.29699999999988
+      ],
+      "page_score": 2
+    },
+    {
+      "table_id": "p244_t02",
+      "page": 244,
+      "page_index_0": 243,
+      "keywords_matched": [
+        "Rated Current",
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9509,
+      "headers": [
+        "[In] Rated Current (A)",
+        "[Ue] Rated Operational Voltage (V)",
+        "Poles Description",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "PratiKa Screw",
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          "IP44",
+          null,
+          null,
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.502,
+        517.986,
+        539.3311894444445,
+        559.0711
+      ],
+      "page_score": 2
+    },
+    {
+      "table_id": "p245_t01",
+      "page": 245,
+      "page_index_0": 244,
+      "keywords_matched": [
+        "Rated Current",
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.948,
+      "headers": [
+        "[In] Rated Current (A)",
+        "[Ue] Rated Operational Voltage (V)",
+        "Poles Description",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "IP44",
+          null,
+          null,
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.835,
+        225.80200000000005,
+        549.616687826087,
+        259.8013333333333
+      ],
+      "page_score": 2
+    },
+    {
+      "table_id": "p247_t01",
+      "page": 247,
+      "page_index_0": 246,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.963,
+      "headers": [
+        "Description",
+        "IP Rating",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "Surface Switches",
+          null,
+          null,
+          null
+        ],
+        [
+          "Single Pole Switches Less Enclosure",
+          null,
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.835,
+        191.70600000000002,
+        550.1349578571428,
+        239.87259999999998
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p247_t02",
+      "page": 247,
+      "page_index_0": 246,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9523,
+      "headers": [
+        "Description",
+        "IP Rating",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "IP66 Industrial Combination Switch Sockets with Enclosure",
+          null,
+          null,
+          null
+        ],
+        [
+          "Single Pole Switches Less Enclosure",
+          null,
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.835,
+        578.7080000000001,
+        550.1349578571428,
+        626.8768
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p248_t01",
+      "page": 248,
+      "page_index_0": 247,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9511,
+      "headers": [
+        "Description",
+        "IP Rating",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "Surface Socket Outlets",
+          null,
+          null,
+          null
+        ],
+        [
+          "3 Pin Sockets Less Enclosure",
+          null,
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.502,
+        158.481,
+        539.2222005882353,
+        206.64599999999973
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p248_t02",
+      "page": 248,
+      "page_index_0": 247,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9548,
+      "headers": [
+        "Description",
+        "IP Rating",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "Plugs",
+          null,
+          null,
+          null
+        ],
+        [
+          "3 Pin Angle Plugs",
+          null,
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        42.502,
+        479.697,
+        539.2222005882353,
+        527.866
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p249_t01",
+      "page": 249,
+      "page_index_0": 248,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9775,
+      "headers": [
+        "Description",
+        "Module Width",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "Switchgear Cover Assembly",
+          null,
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.835,
+        82.57100000000003,
+        548.7708233333334,
+        119.40679999999993
+      ],
+      "page_score": 1
+    },
+    {
+      "table_id": "p249_t02",
+      "page": 249,
+      "page_index_0": 248,
+      "keywords_matched": [
+        "MRP"
+      ],
+      "match_mode": "header_any",
+      "extractor": "pdfplumber",
+      "confidence": 0.9653,
+      "headers": [
+        "Description",
+        "No. of Gangs",
+        "Reference",
+        "Unit MRP [`]"
+      ],
+      "rows": [
+        [
+          "Flush Surrounds",
+          null,
+          null,
+          null
+        ]
+      ],
+      "warnings": [],
+      "bbox": [
+        53.835,
+        224.692,
+        548.7708233333334,
+        261.5268
+      ],
+      "page_score": 1
+    }
+  ],
+  "skipped_pages": []
+}
