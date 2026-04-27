@@ -152,6 +152,7 @@ def main() -> None:
             )
             df_struct = extract_catalog_price_dataframe(result, catalog_regex=catalog_regex)
             relaxed_retry_used = not df_struct.empty
+        auto_text_fallback_used = False
         if allow_text_fallback:
             df_text = extract_catalog_price_from_pdf_text(
                 temp_pdf_path,
@@ -161,6 +162,15 @@ def main() -> None:
             df = merge_catalog_price_results(df_struct, df_text)
         else:
             df = df_struct
+            if df.empty:
+                # Graceful recovery for pages where strict structured parsing misses rows.
+                df_text = extract_catalog_price_from_pdf_text(
+                    temp_pdf_path,
+                    target_pages=target_pages,
+                    catalog_regex=catalog_regex,
+                )
+                df = merge_catalog_price_results(df_struct, df_text)
+                auto_text_fallback_used = not df.empty
         df = format_catalog_price_output(df)
 
     if df.empty:
@@ -169,6 +179,8 @@ def main() -> None:
 
     if relaxed_retry_used:
         st.info("No rows in strict keyword mode; auto-retried with relaxed page filter.")
+    if auto_text_fallback_used:
+        st.info("No rows in strict structured mode; auto-retried with text fallback.")
 
     st.success(f"Extraction complete. Found {len(df)} rows.")
     st.dataframe(df, use_container_width=True, hide_index=True)
