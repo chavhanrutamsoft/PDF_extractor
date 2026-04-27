@@ -97,6 +97,11 @@ def main() -> None:
             "Skip keyword filter for selected pages",
             value=True,
         )
+        allow_text_fallback = st.checkbox(
+            "Allow text fallback (less accurate)",
+            value=False,
+            help="OFF = strict Reference->MRP only (recommended). ON can recover missed pages but may pick wrong column tokens.",
+        )
 
     uploaded_pdf = st.file_uploader("Upload PDF", type=["pdf"])
     run_btn = st.button("Process PDF", type="primary", disabled=uploaded_pdf is None)
@@ -134,16 +139,19 @@ def main() -> None:
         )
 
         df_struct = extract_catalog_price_dataframe(result, catalog_regex=catalog_regex)
-        df_text = extract_catalog_price_from_pdf_text(
-            temp_pdf_path,
-            target_pages=target_pages,
-            catalog_regex=catalog_regex,
-        )
-        if not df_struct.empty and "page" in df_struct.columns:
-            struct_pages = set(df_struct["page"].astype(int).tolist())
-            if "page" in df_text.columns:
-                df_text = df_text[~df_text["page"].astype(int).isin(struct_pages)]
-        df = merge_catalog_price_results(df_struct, df_text)
+        if allow_text_fallback:
+            df_text = extract_catalog_price_from_pdf_text(
+                temp_pdf_path,
+                target_pages=target_pages,
+                catalog_regex=catalog_regex,
+            )
+            if not df_struct.empty and "page" in df_struct.columns:
+                struct_pages = set(df_struct["page"].astype(int).tolist())
+                if "page" in df_text.columns:
+                    df_text = df_text[~df_text["page"].astype(int).isin(struct_pages)]
+            df = merge_catalog_price_results(df_struct, df_text)
+        else:
+            df = df_struct
         df = format_catalog_price_output(df)
 
     if df.empty:
