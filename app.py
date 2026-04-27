@@ -131,14 +131,27 @@ def main() -> None:
             temp_pdf_path = Path(tmp.name)
 
         cfg = ExtractionConfig()
+        applied_keyword_filter = not skip_keyword_filter
         result = extract_keyword_tables(
             temp_pdf_path,
             cfg,
             target_pages=target_pages,
-            apply_keyword_filter=not skip_keyword_filter,
+            apply_keyword_filter=applied_keyword_filter,
         )
 
         df_struct = extract_catalog_price_dataframe(result, catalog_regex=catalog_regex)
+        relaxed_retry_used = False
+        if df_struct.empty and applied_keyword_filter:
+            # Auto-retry for pages where headers do not contain configured keywords
+            # but Reference/LP data is present (e.g., product spotlight pages).
+            result = extract_keyword_tables(
+                temp_pdf_path,
+                cfg,
+                target_pages=target_pages,
+                apply_keyword_filter=False,
+            )
+            df_struct = extract_catalog_price_dataframe(result, catalog_regex=catalog_regex)
+            relaxed_retry_used = not df_struct.empty
         if allow_text_fallback:
             df_text = extract_catalog_price_from_pdf_text(
                 temp_pdf_path,
@@ -153,6 +166,9 @@ def main() -> None:
     if df.empty:
         st.warning("No catalog-price rows found for the selected pages.")
         return
+
+    if relaxed_retry_used:
+        st.info("No rows in strict keyword mode; auto-retried with relaxed page filter.")
 
     st.success(f"Extraction complete. Found {len(df)} rows.")
     st.dataframe(df, use_container_width=True, hide_index=True)
