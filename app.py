@@ -60,8 +60,26 @@ def dataframe_to_excel_bytes(df: pd.DataFrame) -> bytes:
     return buf.getvalue()
 
 
+def hide_streamlit_top_controls() -> None:
+    """Hide Streamlit's top-right chrome controls for a cleaner UI."""
+    st.markdown(
+        """
+        <style>
+            [data-testid="stHeader"],
+            [data-testid="stToolbar"],
+            [data-testid="stDecoration"],
+            [data-testid="stStatusWidget"] {
+                display: none !important;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def main() -> None:
     st.set_page_config(page_title="PDF Catalog Price Extractor", layout="wide")
+    hide_streamlit_top_controls()
     st.title("PDF Catalog Price Extractor")
     st.caption(
         "Upload PDF, enter pages (e.g. 16,18,20-25), and download extracted catalog-price data."
