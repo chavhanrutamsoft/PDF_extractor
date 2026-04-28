@@ -26,26 +26,46 @@ def extract_tables_pdfplumber_page(
     config: ExtractionConfig,
 ) -> list[PdfPlumberTableCandidate]:
     """Find and extract all tables on a single page."""
-    settings = config.table_settings.to_pdfplumber_dict()
-    found = page.find_tables(table_settings=settings)
     out: list[PdfPlumberTableCandidate] = []
-    for idx, table in enumerate(found):
-        try:
-            data = table.extract()
-        except Exception:
-            data = None
-        if not data:
-            continue
-        bbox = tuple(float(x) for x in table.bbox)
-        out.append(
-            PdfPlumberTableCandidate(
-                page_1based=page_1based,
-                page_index_0=page_1based - 1,
-                table_index=idx,
-                bbox=bbox,
-                rows=_ensure_rectangular(data),
+    seen_bbox: set[tuple[int, int, int, int]] = set()
+
+    primary_settings = config.table_settings.to_pdfplumber_dict()
+    text_settings = {
+        **primary_settings,
+        "vertical_strategy": "text",
+        "horizontal_strategy": "text",
+        "min_words_vertical": 2,
+        "min_words_horizontal": 1,
+        "text_tolerance": max(3, int(primary_settings.get("text_tolerance", 3))),
+    }
+    settings_passes = [("pdfplumber", primary_settings), ("pdfplumber_text", text_settings)]
+
+    table_counter = 0
+    for extractor_name, settings in settings_passes:
+        found = page.find_tables(table_settings=settings)
+        for table in found:
+            try:
+                data = table.extract()
+            except Exception:
+                data = None
+            if not data:
+                continue
+            bbox = tuple(float(x) for x in table.bbox)
+            bbox_key = tuple(int(round(v)) for v in bbox)
+            if bbox_key in seen_bbox:
+                continue
+            seen_bbox.add(bbox_key)
+            out.append(
+                PdfPlumberTableCandidate(
+                    page_1based=page_1based,
+                    page_index_0=page_1based - 1,
+                    table_index=table_counter,
+                    bbox=bbox,
+                    rows=_ensure_rectangular(data),
+                    extractor=extractor_name,
+                )
             )
-        )
+            table_counter += 1
     return out
 
 

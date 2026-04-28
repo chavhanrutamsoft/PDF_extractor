@@ -182,6 +182,64 @@ def extract_catalog_price_dataframe(
     cat_re = re.compile(catalog_regex)
     price_re = re.compile(price_regex)
     records: list[dict] = []
+    ref_tail_re = re.compile(r"\breference\b[\]\)]*$", re.IGNORECASE)
+    mrp_tail_re = re.compile(
+        r"\b(?:mrp|lp)\b(?:\s*\[[^\]]*\])?[\]\)]*$",
+        re.IGNORECASE,
+    )
+
+    def parse_price_from_row(
+        row_values: list[str],
+        mrp_idx: int,
+        price_header: str,
+    ) -> tuple[str | None, str | None]:
+        """
+        Parse price-like value from the mapped MRP/LP column.
+        Returns (normalized_price, raw_price_text).
+
+        Handles fragmented tokens such as:
+        - "On R" + "equ" + "est" -> "On Request"
+        - "1,2" + "34" -> "1,234"
+        """
+        start_candidates = [mrp_idx, mrp_idx - 1, mrp_idx + 1]
+        checked: set[int] = set()
+        is_lp_price_col = " lp" in f" {price_header}" or price_header.endswith("lp")
+        for start_idx in start_candidates:
+            if start_idx in checked or start_idx < 0 or start_idx >= len(row_values):
+                continue
+            checked.add(start_idx)
+
+            base = (row_values[start_idx] or "").strip()
+            if not base:
+                continue
+
+            fragments: list[str] = [base]
+            for step in range(1, max_price_lookahead + 1):
+                nx = start_idx + step
+                if nx >= len(row_values):
+                    break
+                nxt = (row_values[nx] or "").strip()
+                if not nxt:
+                    break
+                fragments.append(nxt)
+
+            joined_space = " ".join(fragments).strip()
+            joined_compact = "".join(fragments).replace(" ", "")
+
+            is_on_request = "onrequest" in joined_compact.lower()
+            if is_lp_price_col or is_on_request:
+                if is_on_request:
+                    return "On Request", joined_space
+                return base, base
+
+            # Numeric price can be split in adjacent columns, so validate compact form.
+            compact_numeric = joined_compact.replace(",", "")
+            if price_re.match(compact_numeric):
+                if compact_numeric.isdigit() and len(compact_numeric) < 3:
+                    continue
+                return compact_numeric, joined_space
+        return None, None
+
     def looks_strict_catalog(token: str) -> bool:
         # Catalog can be pure numeric (e.g. 28900) OR mixed alphanumeric.
         if not token:
@@ -194,8 +252,6 @@ def extract_catalog_price_dataframe(
         pairs: list[tuple[int, int]] = []
         ref_cols: list[int] = []
         mrp_cols: list[int] = []
-        ref_tail_re = re.compile(r"\breference\b[\]\)]*$", re.IGNORECASE)
-        mrp_tail_re = re.compile(r"\bmrp\b(?:\s*\[[^\]]*\])?[\]\)]*$", re.IGNORECASE)
 
         def _header_segments(text: str) -> list[str]:
             # Headers can be merged like "X | Three Pole Reference"
@@ -237,12 +293,45 @@ def extract_catalog_price_dataframe(
             pairs.append((ref_idx, chosen))
         return pairs
 
+    def infer_ref_mrp_pairs_from_rows(rows: list[list[str | None]]) -> tuple[list[tuple[int, int]], set[int]]:
+        """
+        Find a row that contains header-like labels ending in Reference/MRP and infer column pairs.
+        Returns (pairs, header_row_indices).
+        """
+        for ridx, row in enumerate(rows):
+            vals = [str(v or "").strip().lower() for v in row]
+            ref_cols = [i for i, v in enumerate(vals) if ref_tail_re.search(v)]
+            mrp_cols = [i for i, v in enumerate(vals) if mrp_tail_re.search(v)]
+            if not ref_cols or not mrp_cols:
+                continue
+            pairs: list[tuple[int, int]] = []
+            used: set[int] = set()
+            for r in ref_cols:
+                rights = [m for m in mrp_cols if m > r and m not in used]
+                if rights:
+                    m = min(rights, key=lambda x: x - r)
+                else:
+                    rem = [m for m in mrp_cols if m not in used]
+                    if not rem:
+                        continue
+                    m = min(rem, key=lambda x: abs(x - r))
+                used.add(m)
+                pairs.append((r, m))
+            if pairs:
+                return pairs, {ridx}
+        return [], set()
+
     for t in result.tables:
         ref_mrp_pairs = build_ref_mrp_pairs(t.headers)
+        skip_rows: set[int] = set()
         if not ref_mrp_pairs:
-            # Per user rule: only process tables where headers map Reference -> MRP.
+            ref_mrp_pairs, skip_rows = infer_ref_mrp_pairs_from_rows(t.rows)
+        if not ref_mrp_pairs:
+            # Per user rule: only process tables where we can map Reference -> MRP.
             continue
         for ri, row in enumerate(t.rows):
+            if ri in skip_rows:
+                continue
             row_values = [str(v).strip() if v is not None else "" for v in row]
 
             # Preferred path: Reference -> MRP mapping from table headers
@@ -265,10 +354,13 @@ def extract_catalog_price_dataframe(
                     mrp_val = row_values[mrp_idx]
                     if not mrp_val:
                         continue
-                    compact = mrp_val.replace(" ", "").replace(",", "")
-                    if not price_re.match(compact):
-                        continue
-                    if compact.isdigit() and len(compact) < 3:
+                    price_header = ""
+                    if mrp_idx < len(t.headers):
+                        price_header = str(t.headers[mrp_idx] or "").lower()
+                    normalized_price, price_raw = parse_price_from_row(
+                        row_values, mrp_idx, price_header
+                    )
+                    if not normalized_price:
                         continue
                     records.append(
                         {
@@ -276,8 +368,8 @@ def extract_catalog_price_dataframe(
                             "table_id": t.table_id,
                             "row_index": ri,
                             "catalog_no": normalized_catalog,
-                            "price": compact,
-                            "price_raw": mrp_val,
+                            "price": normalized_price,
+                            "price_raw": price_raw or mrp_val,
                             "catalog_col": ref_idx,
                             "price_col": mrp_idx,
                             "pole_hint": "",
