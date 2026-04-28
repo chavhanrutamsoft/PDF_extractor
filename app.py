@@ -61,12 +61,10 @@ def dataframe_to_excel_bytes(df: pd.DataFrame) -> bytes:
 
 
 def hide_streamlit_top_controls() -> None:
-    """Hide Streamlit's top-right chrome controls for a cleaner UI."""
+    """Hide extra Streamlit chrome without removing the sidebar toggle."""
     st.markdown(
         """
         <style>
-            [data-testid="stHeader"],
-            [data-testid="stToolbar"],
             [data-testid="stDecoration"],
             [data-testid="stStatusWidget"] {
                 display: none !important;
@@ -84,27 +82,46 @@ def main() -> None:
     st.caption(
         "Upload PDF, enter pages (e.g. 16,18,20-25), and download extracted catalog-price data."
     )
+    st.markdown(
+        "Use the fields below to extract catalog numbers and prices from selected PDF pages."
+    )
 
-    with st.sidebar:
+    with st.container():
         st.subheader("Extraction Settings")
-        pages_text = st.text_input("Pages (comma/range)", value="")
-        catalog_regex = st.text_input(
-            "Catalog regex",
-            value=r"(?i)^[A-Z0-9_]{5,}$",
-            help="Use strict pattern if needed, e.g. ^[C][A-Z0-9]{6,}$",
-        )
-        skip_keyword_filter = st.checkbox(
-            "Skip keyword filter for selected pages",
-            value=True,
-        )
-        allow_text_fallback = st.checkbox(
-            "Allow text fallback (less accurate)",
-            value=False,
-            help="OFF = strict Reference->MRP only (recommended). ON can recover missed pages but may pick wrong column tokens.",
-        )
+        col1, col2 = st.columns([1.3, 1])
+        with col1:
+            pages_text = st.text_input(
+                "Pages",
+                value="",
+                placeholder="e.g. 14 or 16,18,20-25",
+            )
+            st.caption("Enter single pages, comma-separated pages, or ranges.")
+            catalog_regex = st.text_input(
+                "Catalog Regex",
+                value=r"(?i)^[A-Z0-9_]{5,}$",
+                help="Use a stricter pattern only if needed, e.g. ^[C][A-Z0-9]{6,}$",
+            )
+        with col2:
+            skip_keyword_filter = st.checkbox(
+                "Skip keyword filter for selected pages",
+                value=True,
+            )
+            allow_text_fallback = st.checkbox(
+                "Allow text fallback",
+                value=False,
+                help="Less accurate, but can recover rows when strict structured parsing misses them.",
+            )
+            st.caption("Recommended: keep keyword filter skipped for page-specific extraction.")
 
-    uploaded_pdf = st.file_uploader("Upload PDF", type=["pdf"])
-    run_btn = st.button("Process PDF", type="primary", disabled=uploaded_pdf is None)
+    st.divider()
+
+    upload_col, action_col = st.columns([1.6, 0.6])
+    with upload_col:
+        uploaded_pdf = st.file_uploader("Upload PDF", type=["pdf"])
+    with action_col:
+        st.write("")
+        st.write("")
+        run_btn = st.button("Process PDF", type="primary", disabled=uploaded_pdf is None, use_container_width=True)
 
     if not run_btn:
         return
@@ -182,28 +199,39 @@ def main() -> None:
     if auto_text_fallback_used:
         st.info("No rows in strict structured mode; auto-retried with text fallback.")
 
-    st.success(f"Extraction complete. Found {len(df)} rows.")
+    metric_col1, metric_col2 = st.columns([0.35, 0.65])
+    with metric_col1:
+        st.metric("Rows Found", len(df))
+    with metric_col2:
+        st.success(f"Extraction complete for {uploaded_pdf.name}.")
+
     st.dataframe(df, use_container_width=True, hide_index=True)
 
     out_stem = f"{Path(uploaded_pdf.name).stem}_catalog_prices"
     try:
         excel_bytes = dataframe_to_excel_bytes(df)
-        st.download_button(
-            "Download Excel",
-            data=excel_bytes,
-            file_name=f"{out_stem}.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        )
+        dl_col1, dl_col2 = st.columns([0.3, 0.7])
+        with dl_col1:
+            st.download_button(
+                "Download Excel",
+                data=excel_bytes,
+                file_name=f"{out_stem}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True,
+            )
     except ModuleNotFoundError:
         # Fallback for environments where openpyxl is unavailable.
         csv_bytes = df.to_csv(index=False).encode("utf-8")
         st.warning("openpyxl is not installed in this environment. Downloading CSV instead.")
-        st.download_button(
-            "Download CSV",
-            data=csv_bytes,
-            file_name=f"{out_stem}.csv",
-            mime="text/csv",
-        )
+        dl_col1, dl_col2 = st.columns([0.3, 0.7])
+        with dl_col1:
+            st.download_button(
+                "Download CSV",
+                data=csv_bytes,
+                file_name=f"{out_stem}.csv",
+                mime="text/csv",
+                use_container_width=True,
+            )
 
 
 if __name__ == "__main__":
