@@ -65,6 +65,39 @@ def hide_streamlit_top_controls() -> None:
     st.markdown(
         """
         <style>
+            .stApp {
+                background: radial-gradient(circle at top right, #eef4ff 0%, #f8fbff 35%, #ffffff 75%);
+            }
+            .block-container {
+                padding-top: 1.25rem !important;
+                padding-bottom: 2.2rem !important;
+            }
+            .app-card {
+                border: 1px solid #dbe5ff;
+                border-radius: 14px;
+                padding: 14px 16px;
+                background: #ffffffcc;
+                box-shadow: 0 4px 12px rgba(18, 50, 120, 0.06);
+                margin-bottom: 10px;
+            }
+            .app-muted {
+                color: #4b5f7f;
+                font-size: 0.93rem;
+            }
+            .kpi-wrap {
+                border: 1px solid #d9e4ff;
+                border-radius: 10px;
+                padding: 10px 12px;
+                background: #f8fbff;
+            }
+            .stDownloadButton button {
+                border-radius: 10px;
+                font-weight: 600;
+            }
+            .stButton button {
+                border-radius: 10px;
+                font-weight: 600;
+            }
             [data-testid="stDecoration"],
             [data-testid="stStatusWidget"] {
                 display: none !important;
@@ -76,52 +109,69 @@ def hide_streamlit_top_controls() -> None:
 
 
 def main() -> None:
-    st.set_page_config(page_title="PDF Catalog Price Extractor", layout="wide")
+    st.set_page_config(
+        page_title="PDF Catalog Price Extractor",
+        page_icon="📄",
+        layout="wide",
+        initial_sidebar_state="expanded",
+    )
     hide_streamlit_top_controls()
-    st.title("PDF Catalog Price Extractor")
-    st.caption(
-        "Upload PDF, enter pages (e.g. 16,18,20-25), and download extracted catalog-price data."
-    )
     st.markdown(
-        "Use the fields below to extract catalog numbers and prices from selected PDF pages."
+        """
+        <div class="app-card">
+            <h2 style="margin:0 0 0.35rem 0;">PDF Catalog Price Extractor</h2>
+            <div class="app-muted">
+                Upload your PDF, choose target pages (e.g. <b>14</b> or <b>16,18,20-25</b>),
+                and export clean catalog-price results.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
-    with st.container():
+    with st.sidebar:
         st.subheader("Extraction Settings")
-        col1, col2 = st.columns([1.3, 1])
-        with col1:
-            pages_text = st.text_input(
-                "Pages",
-                value="",
-                placeholder="e.g. 14 or 16,18,20-25",
-            )
-            st.caption("Enter single pages, comma-separated pages, or ranges.")
-            catalog_regex = st.text_input(
-                "Catalog Regex",
-                value=r"(?i)^[A-Z0-9_]{5,}$",
-                help="Use a stricter pattern only if needed, e.g. ^[C][A-Z0-9]{6,}$",
-            )
-        with col2:
-            skip_keyword_filter = st.checkbox(
-                "Skip keyword filter for selected pages",
-                value=True,
-            )
-            allow_text_fallback = st.checkbox(
-                "Allow text fallback",
-                value=False,
-                help="Less accurate, but can recover rows when strict structured parsing misses them.",
-            )
-            st.caption("Recommended: keep keyword filter skipped for page-specific extraction.")
+        st.caption("Tune matching quality and recovery behavior.")
+        pages_text = st.text_input("Pages (comma/range)", value="")
+        catalog_regex = st.text_input(
+            "Catalog regex",
+            value=r"(?i)^[A-Z0-9_]{5,}$",
+            help="Use strict pattern if needed, e.g. ^[C][A-Z0-9]{6,}$",
+        )
+        skip_keyword_filter = st.checkbox(
+            "Skip keyword filter for selected pages",
+            value=True,
+        )
+        allow_text_fallback = st.checkbox(
+            "Allow text fallback (less accurate)",
+            value=True,
+            help="OFF = strict Reference->MRP only (recommended). ON can recover missed pages but may pick wrong column tokens.",
+        )
+        st.markdown("---")
+        st.markdown(
+            """
+            <div class="app-muted">
+                <b>Tip:</b> If a page returns no rows, keep <i>Skip keyword filter</i> ON.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-    st.divider()
-
-    upload_col, action_col = st.columns([1.6, 0.6])
-    with upload_col:
+    top_left, top_right = st.columns([1.45, 1.0], gap="large")
+    with top_left:
         uploaded_pdf = st.file_uploader("Upload PDF", type=["pdf"])
-    with action_col:
-        st.write("")
-        st.write("")
-        run_btn = st.button("Process PDF", type="primary", disabled=uploaded_pdf is None, use_container_width=True)
+    with top_right:
+        st.markdown('<div class="kpi-wrap">', unsafe_allow_html=True)
+        st.metric("Target Pages", pages_text if pages_text.strip() else "Not set")
+        st.caption("Enter at least one page number to run extraction.")
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    run_btn = st.button(
+        "Process PDF",
+        type="primary",
+        disabled=uploaded_pdf is None or not pages_text.strip(),
+        use_container_width=True,
+    )
 
     if not run_btn:
         return
@@ -199,19 +249,36 @@ def main() -> None:
     if auto_text_fallback_used:
         st.info("No rows in strict structured mode; auto-retried with text fallback.")
 
-    metric_col1, metric_col2 = st.columns([0.35, 0.65])
-    with metric_col1:
-        st.metric("Rows Found", len(df))
-    with metric_col2:
-        st.success(f"Extraction complete for {uploaded_pdf.name}.")
+    st.success(f"Extraction complete. Found {len(df)} rows.")
+    k1, k2, k3 = st.columns(3)
+    with k1:
+        st.metric("Rows", len(df))
+    with k2:
+        st.metric("Unique Catalogs", df["catalog_no"].nunique() if "catalog_no" in df.columns else 0)
+    with k3:
+        st.metric("Pages Returned", df["page"].nunique() if "page" in df.columns else 0)
 
-    st.dataframe(df, use_container_width=True, hide_index=True)
+    tab_data, tab_preview = st.tabs(["Extracted Data", "Quick Preview"])
+    with tab_data:
+        st.dataframe(df, use_container_width=True, hide_index=True)
+    with tab_preview:
+        st.markdown("Top 10 rows")
+        st.table(df.head(10))
 
     out_stem = f"{Path(uploaded_pdf.name).stem}_catalog_prices"
-    try:
-        excel_bytes = dataframe_to_excel_bytes(df)
-        dl_col1, dl_col2 = st.columns([0.3, 0.7])
-        with dl_col1:
+    dl1, dl2 = st.columns(2)
+    csv_bytes = df.to_csv(index=False).encode("utf-8")
+    with dl1:
+        st.download_button(
+            "Download CSV",
+            data=csv_bytes,
+            file_name=f"{out_stem}.csv",
+            mime="text/csv",
+            use_container_width=True,
+        )
+    with dl2:
+        try:
+            excel_bytes = dataframe_to_excel_bytes(df)
             st.download_button(
                 "Download Excel",
                 data=excel_bytes,
@@ -219,19 +286,8 @@ def main() -> None:
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 use_container_width=True,
             )
-    except ModuleNotFoundError:
-        # Fallback for environments where openpyxl is unavailable.
-        csv_bytes = df.to_csv(index=False).encode("utf-8")
-        st.warning("openpyxl is not installed in this environment. Downloading CSV instead.")
-        dl_col1, dl_col2 = st.columns([0.3, 0.7])
-        with dl_col1:
-            st.download_button(
-                "Download CSV",
-                data=csv_bytes,
-                file_name=f"{out_stem}.csv",
-                mime="text/csv",
-                use_container_width=True,
-            )
+        except ModuleNotFoundError:
+            st.info("openpyxl not installed in this environment. Use CSV download.")
 
 
 if __name__ == "__main__":
