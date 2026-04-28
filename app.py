@@ -61,7 +61,7 @@ def dataframe_to_excel_bytes(df: pd.DataFrame) -> bytes:
 
 
 def hide_streamlit_top_controls() -> None:
-    """Hide extra Streamlit chrome without removing the sidebar toggle."""
+    """Hide Streamlit top chrome/buttons for a clean app shell."""
     st.markdown(
         """
         <style>
@@ -98,6 +98,8 @@ def hide_streamlit_top_controls() -> None:
                 border-radius: 10px;
                 font-weight: 600;
             }
+            [data-testid="stHeader"],
+            [data-testid="stToolbar"],
             [data-testid="stDecoration"],
             [data-testid="stStatusWidget"] {
                 display: none !important;
