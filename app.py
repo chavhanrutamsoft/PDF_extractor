@@ -111,24 +111,26 @@ def hide_streamlit_top_controls() -> None:
     )
 
 
-def inject_adsense_script() -> None:
-    """Load the AdSense script into the parent page once."""
+def inject_adsense_meta_tag() -> None:
+    """Add the AdSense account meta tag to the parent document head once."""
     components.html(
         """
         <script>
         (function () {
-            const scriptId = "adsense-script-ca-pub-7410896079447393";
+            const metaName = "google-adsense-account";
+            const metaContent = "ca-pub-7410896079447393";
             const parentDoc = window.parent.document;
-            if (parentDoc.getElementById(scriptId)) {
+            const existing = parentDoc.querySelector(`meta[name="${metaName}"]`);
+
+            if (existing) {
+                existing.setAttribute("content", metaContent);
                 return;
             }
 
-            const script = parentDoc.createElement("script");
-            script.id = scriptId;
-            script.async = true;
-            script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7410896079447393";
-            script.crossOrigin = "anonymous";
-            parentDoc.head.appendChild(script);
+            const meta = parentDoc.createElement("meta");
+            meta.name = metaName;
+            meta.content = metaContent;
+            parentDoc.head.appendChild(meta);
         })();
         </script>
         """,
@@ -144,7 +146,7 @@ def main() -> None:
         layout="wide",
         initial_sidebar_state="expanded",
     )
-    inject_adsense_script()
+    inject_adsense_meta_tag()
     hide_streamlit_top_controls()
     st.markdown(
         """
