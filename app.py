@@ -11,7 +11,6 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
-import streamlit.components.v1 as components
 
 ROOT = Path(__file__).resolve().parent
 SRC = ROOT / "src"
@@ -111,34 +110,6 @@ def hide_streamlit_top_controls() -> None:
     )
 
 
-def inject_adsense_meta_tag() -> None:
-    """Add the AdSense account meta tag to the parent document head once."""
-    components.html(
-        """
-        <script>
-        (function () {
-            const metaName = "google-adsense-account";
-            const metaContent = "ca-pub-7410896079447393";
-            const parentDoc = window.parent.document;
-            const existing = parentDoc.querySelector(`meta[name="${metaName}"]`);
-
-            if (existing) {
-                existing.setAttribute("content", metaContent);
-                return;
-            }
-
-            const meta = parentDoc.createElement("meta");
-            meta.name = metaName;
-            meta.content = metaContent;
-            parentDoc.head.appendChild(meta);
-        })();
-        </script>
-        """,
-        height=0,
-        width=0,
-    )
-
-
 def main() -> None:
     st.set_page_config(
         page_title="PDF Catalog Price Extractor",
@@ -146,7 +117,6 @@ def main() -> None:
         layout="wide",
         initial_sidebar_state="expanded",
     )
-    inject_adsense_meta_tag()
     hide_streamlit_top_controls()
     st.markdown(
         """
