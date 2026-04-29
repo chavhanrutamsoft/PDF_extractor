@@ -11,6 +11,7 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 
 ROOT = Path(__file__).resolve().parent
 SRC = ROOT / "src"
@@ -110,6 +111,32 @@ def hide_streamlit_top_controls() -> None:
     )
 
 
+def inject_adsense_script() -> None:
+    """Load the AdSense script into the parent page once."""
+    components.html(
+        """
+        <script>
+        (function () {
+            const scriptId = "adsense-script-ca-pub-7410896079447393";
+            const parentDoc = window.parent.document;
+            if (parentDoc.getElementById(scriptId)) {
+                return;
+            }
+
+            const script = parentDoc.createElement("script");
+            script.id = scriptId;
+            script.async = true;
+            script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7410896079447393";
+            script.crossOrigin = "anonymous";
+            parentDoc.head.appendChild(script);
+        })();
+        </script>
+        """,
+        height=0,
+        width=0,
+    )
+
+
 def main() -> None:
     st.set_page_config(
         page_title="PDF Catalog Price Extractor",
@@ -117,6 +144,7 @@ def main() -> None:
         layout="wide",
         initial_sidebar_state="expanded",
     )
+    inject_adsense_script()
     hide_streamlit_top_controls()
     st.markdown(
         """
