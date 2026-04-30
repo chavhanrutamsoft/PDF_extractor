@@ -20,11 +20,19 @@ if str(SRC) not in sys.path:
 from pdf_table_pipeline.config import ExtractionConfig
 from pdf_table_pipeline.pipeline import (
     extract_catalog_price_dataframe,
+    extract_catalog_price_dataframe_siemens,
     extract_catalog_price_from_pdf_text,
     extract_keyword_tables,
     format_catalog_price_output,
     merge_catalog_price_results,
 )
+
+SCHNEIDER_CLIENT = "Schneider"
+SIEMENS_CLIENT = "Siemens"
+# Accept full Siemens type codes such as:
+# - 3WJ1108-2AF02-1AA0 (multi-hyphen)
+# - 3WJ9111-0AD01 (single-hyphen)
+SIEMENS_FULL_CATALOG_REGEX = r"(?i)^\d[A-Z0-9]{5,}(?:-[A-Z0-9.]{4,})+$"
 
 
 def parse_pages_spec(spec: str) -> set[int]:
@@ -151,10 +159,21 @@ def main() -> None:
     with st.sidebar:
         st.subheader("Extraction Settings")
         st.caption("Tune matching quality and recovery behavior.")
+        selected_client = st.selectbox(
+            "PDF Client",
+            options=[SCHNEIDER_CLIENT, SIEMENS_CLIENT],
+            index=0,
+            help="Choose the vendor format before processing the PDF.",
+        )
+        default_catalog_regex = (
+            r"(?i)^[A-Z0-9_]{5,}$"
+            if selected_client == SCHNEIDER_CLIENT
+            else SIEMENS_FULL_CATALOG_REGEX
+        )
         pages_text = st.text_input("Pages (comma/range)", value="")
         catalog_regex = st.text_input(
             "Catalog regex",
-            value=r"(?i)^[A-Z0-9_]{5,}$",
+            value=default_catalog_regex,
             help="Use strict pattern if needed, e.g. ^[C][A-Z0-9]{6,}$",
         )
         skip_keyword_filter = st.checkbox(
@@ -175,6 +194,8 @@ def main() -> None:
             """,
             unsafe_allow_html=True,
         )
+        if selected_client == SIEMENS_CLIENT:
+            st.info("Siemens mode enabled: parser uses Siemens-friendly catalog matching.")
 
     top_left, top_right = st.columns([1.45, 1.0], gap="large")
     with top_left:
@@ -211,39 +232,68 @@ def main() -> None:
         st.error(f"Invalid catalog regex: {exc}")
         return
 
-    with st.spinner("Processing PDF..."):
+    with st.spinner(f"Processing {selected_client} PDF..."):
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
             tmp.write(uploaded_pdf.getvalue())
             temp_pdf_path = Path(tmp.name)
 
         cfg = ExtractionConfig()
-        applied_keyword_filter = not skip_keyword_filter
-        result = extract_keyword_tables(
-            temp_pdf_path,
-            cfg,
-            target_pages=target_pages,
-            apply_keyword_filter=applied_keyword_filter,
-        )
-
-        df_struct = extract_catalog_price_dataframe(result, catalog_regex=catalog_regex)
         relaxed_retry_used = False
-        if df_struct.empty and applied_keyword_filter:
-            # Auto-retry for pages where headers do not contain configured keywords
-            # but Reference/LP data is present (e.g., product spotlight pages).
+        auto_text_fallback_used = False
+
+        if selected_client == SCHNEIDER_CLIENT:
+            # Keep existing Schneider behavior unchanged.
+            applied_keyword_filter = not skip_keyword_filter
             result = extract_keyword_tables(
                 temp_pdf_path,
                 cfg,
                 target_pages=target_pages,
-                apply_keyword_filter=False,
+                apply_keyword_filter=applied_keyword_filter,
             )
             df_struct = extract_catalog_price_dataframe(result, catalog_regex=catalog_regex)
-            relaxed_retry_used = not df_struct.empty
-        auto_text_fallback_used = False
+            if df_struct.empty and applied_keyword_filter:
+                # Auto-retry for pages where headers do not contain configured keywords
+                # but Reference/LP data is present (e.g., product spotlight pages).
+                result = extract_keyword_tables(
+                    temp_pdf_path,
+                    cfg,
+                    target_pages=target_pages,
+                    apply_keyword_filter=False,
+                )
+                df_struct = extract_catalog_price_dataframe(result, catalog_regex=catalog_regex)
+                relaxed_retry_used = not df_struct.empty
+        else:
+            # Siemens mode: default to relaxed keyword filtering because keyword set
+            # is currently Schneider-oriented.
+            applied_keyword_filter = False if skip_keyword_filter else True
+            result = extract_keyword_tables(
+                temp_pdf_path,
+                cfg,
+                target_pages=target_pages,
+                apply_keyword_filter=applied_keyword_filter,
+            )
+            df_struct = extract_catalog_price_dataframe_siemens(
+                result, catalog_regex=catalog_regex
+            )
+            if df_struct.empty and applied_keyword_filter:
+                df_text = extract_catalog_price_from_pdf_text(
+                    temp_pdf_path,
+                    target_pages=target_pages,
+                    catalog_regex=catalog_regex,
+                )
+                df_struct = merge_catalog_price_results(df_struct, df_text)
+                relaxed_retry_used = not df_struct.empty
+
         if allow_text_fallback:
+            text_fallback_catalog_regex = (
+                catalog_regex
+                if selected_client == SCHNEIDER_CLIENT
+                else SIEMENS_FULL_CATALOG_REGEX
+            )
             df_text = extract_catalog_price_from_pdf_text(
                 temp_pdf_path,
                 target_pages=target_pages,
-                catalog_regex=catalog_regex,
+                catalog_regex=text_fallback_catalog_regex,
             )
             df = merge_catalog_price_results(df_struct, df_text)
         else:
@@ -253,10 +303,16 @@ def main() -> None:
                 df_text = extract_catalog_price_from_pdf_text(
                     temp_pdf_path,
                     target_pages=target_pages,
-                    catalog_regex=catalog_regex,
+                    catalog_regex=(
+                        catalog_regex
+                        if selected_client == SCHNEIDER_CLIENT
+                        else SIEMENS_FULL_CATALOG_REGEX
+                    ),
                 )
                 df = merge_catalog_price_results(df_struct, df_text)
                 auto_text_fallback_used = not df.empty
+        if selected_client == SIEMENS_CLIENT and not df.empty and "catalog_no" in df.columns:
+            df = df[df["catalog_no"].astype(str).str.match(SIEMENS_FULL_CATALOG_REGEX, na=False)]
         df = format_catalog_price_output(df)
 
     if df.empty:
@@ -284,7 +340,7 @@ def main() -> None:
         st.markdown("Top 10 rows")
         st.table(df.head(10))
 
-    out_stem = f"{Path(uploaded_pdf.name).stem}_catalog_prices"
+    out_stem = f"{Path(uploaded_pdf.name).stem}_{selected_client.lower()}_catalog_prices"
     dl1, dl2 = st.columns(2)
     csv_bytes = df.to_csv(index=False).encode("utf-8")
     with dl1:
