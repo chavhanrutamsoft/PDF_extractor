@@ -102,6 +102,14 @@ def hide_streamlit_top_controls() -> None:
             [data-testid="stStatusWidget"] {
                 display: none !important;
             }
+            /* Hide top-right Streamlit action buttons (Share/GitHub/etc.) */
+            [data-testid="stToolbarActions"] {
+                display: none !important;
+            }
+            [data-testid="stToolbar"] a,
+            [data-testid="stToolbar"] button[kind="header"] {
+                display: none !important;
+            }
             /* Hide close button so user cannot collapse sidebar */
             [data-testid="stSidebarCollapseButton"],
             button[title="Close sidebar"] {
