@@ -18,14 +18,16 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from pdf_table_pipeline.config import ExtractionConfig
-from pdf_table_pipeline.pipeline import (
-    extract_catalog_price_dataframe,
-    extract_catalog_price_dataframe_siemens,
-    extract_catalog_price_from_pdf_text,
-    extract_keyword_tables,
-    format_catalog_price_output,
-    merge_catalog_price_results,
+from pdf_table_pipeline import pipeline as pipeline_mod
+
+extract_catalog_price_dataframe = pipeline_mod.extract_catalog_price_dataframe
+extract_catalog_price_dataframe_siemens = getattr(
+    pipeline_mod, "extract_catalog_price_dataframe_siemens", extract_catalog_price_dataframe
 )
+extract_catalog_price_from_pdf_text = pipeline_mod.extract_catalog_price_from_pdf_text
+extract_keyword_tables = pipeline_mod.extract_keyword_tables
+format_catalog_price_output = pipeline_mod.format_catalog_price_output
+merge_catalog_price_results = pipeline_mod.merge_catalog_price_results
 
 SCHNEIDER_CLIENT = "Schneider"
 SIEMENS_CLIENT = "Siemens"
