@@ -98,9 +98,13 @@ def hide_streamlit_top_controls() -> None:
                 border-radius: 10px;
                 font-weight: 600;
             }
-            [data-testid="stHeader"],
             [data-testid="stDecoration"],
             [data-testid="stStatusWidget"] {
+                display: none !important;
+            }
+            /* Hide close button so user cannot collapse sidebar */
+            [data-testid="stSidebarCollapseButton"],
+            button[title="Close sidebar"] {
                 display: none !important;
             }
         </style>
