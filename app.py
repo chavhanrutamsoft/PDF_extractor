@@ -21,9 +21,7 @@ from pdf_table_pipeline.config import ExtractionConfig
 from pdf_table_pipeline import pipeline as pipeline_mod
 
 extract_catalog_price_dataframe = pipeline_mod.extract_catalog_price_dataframe
-extract_catalog_price_dataframe_siemens = getattr(
-    pipeline_mod, "extract_catalog_price_dataframe_siemens", extract_catalog_price_dataframe
-)
+extract_catalog_price_dataframe_siemens = getattr(pipeline_mod, "extract_catalog_price_dataframe_siemens", None)
 extract_catalog_price_from_pdf_text = pipeline_mod.extract_catalog_price_from_pdf_text
 extract_keyword_tables = pipeline_mod.extract_keyword_tables
 format_catalog_price_output = pipeline_mod.format_catalog_price_output
@@ -35,6 +33,78 @@ SIEMENS_CLIENT = "Siemens"
 # - 3WJ1108-2AF02-1AA0 (multi-hyphen)
 # - 3WJ9111-0AD01 (single-hyphen)
 SIEMENS_FULL_CATALOG_REGEX = r"(?i)^\d[A-Z0-9]{5,}(?:-[A-Z0-9.]{4,})+$"
+
+
+def extract_catalog_price_dataframe_siemens_fallback(
+    result,
+    catalog_regex: str = SIEMENS_FULL_CATALOG_REGEX,
+) -> pd.DataFrame:
+    """Cloud-safe Siemens parser when pipeline module is outdated."""
+    cat_re = re.compile(catalog_regex)
+    token_catalog_re = re.compile(r"(?i)\b[A-Z0-9]{2,}(?:[-/][A-Z0-9.]{2,})+\b")
+    token_price_re = re.compile(r"(?<!\d)(\d[\d,]*)\s*\.-")
+    records: list[dict] = []
+
+    def is_complete_siemens_catalog(token: str) -> bool:
+        normalized = re.sub(r"[^A-Z0-9_./-]", "", token.upper())
+        if not normalized or not cat_re.match(normalized):
+            return False
+        if "-" not in normalized:
+            return False
+        first_segment = normalized.split("-", 1)[0]
+        if len(first_segment) < 6:
+            return False
+        if not normalized[0].isdigit():
+            return False
+        if not any(ch.isalpha() for ch in first_segment):
+            return False
+        if not any(ch.isdigit() for ch in first_segment):
+            return False
+        return True
+
+    for t in result.tables:
+        for ri, row in enumerate(t.rows):
+            tokens: list[tuple[str, str, int]] = []
+            for ci, cell in enumerate(row):
+                text = str(cell or "").strip()
+                if not text:
+                    continue
+                for m in token_catalog_re.finditer(text):
+                    catalog = re.sub(r"[^A-Z0-9_./-]", "", m.group(0).strip().upper())
+                    if is_complete_siemens_catalog(catalog):
+                        tokens.append(("catalog", catalog, ci))
+                for m in token_price_re.finditer(text):
+                    price = m.group(1).replace(",", "")
+                    if price.isdigit() and len(price) >= 3:
+                        tokens.append(("price", price, ci))
+
+            for idx, (kind, value, col_idx) in enumerate(tokens):
+                if kind != "catalog":
+                    continue
+                next_price = next((tup for tup in tokens[idx + 1 :] if tup[0] == "price"), None)
+                if not next_price:
+                    continue
+                _, price_val, price_col = next_price
+                records.append(
+                    {
+                        "page": t.page,
+                        "table_id": t.table_id,
+                        "row_index": ri,
+                        "catalog_no": value,
+                        "price": price_val,
+                        "price_raw": f"{price_val}.-",
+                        "catalog_col": col_idx,
+                        "price_col": price_col,
+                        "pole_hint": "",
+                    }
+                )
+
+    df = pd.DataFrame.from_records(records)
+    if df.empty:
+        return df
+    return df.drop_duplicates(subset=["page", "catalog_no", "price"]).sort_values(
+        by=["page", "table_id", "row_index", "catalog_col"]
+    ).reset_index(drop=True)
 
 
 def parse_pages_spec(spec: str) -> set[int]:
@@ -274,9 +344,14 @@ def main() -> None:
                 target_pages=target_pages,
                 apply_keyword_filter=applied_keyword_filter,
             )
-            df_struct = extract_catalog_price_dataframe_siemens(
-                result, catalog_regex=catalog_regex
-            )
+            if extract_catalog_price_dataframe_siemens is not None:
+                df_struct = extract_catalog_price_dataframe_siemens(
+                    result, catalog_regex=catalog_regex
+                )
+            else:
+                df_struct = extract_catalog_price_dataframe_siemens_fallback(
+                    result, catalog_regex=catalog_regex
+                )
             if df_struct.empty and applied_keyword_filter:
                 df_text = extract_catalog_price_from_pdf_text(
                     temp_pdf_path,
