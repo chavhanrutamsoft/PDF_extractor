@@ -99,7 +99,6 @@ def hide_streamlit_top_controls() -> None:
                 font-weight: 600;
             }
             [data-testid="stHeader"],
-            [data-testid="stToolbar"],
             [data-testid="stDecoration"],
             [data-testid="stStatusWidget"] {
                 display: none !important;
