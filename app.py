@@ -98,6 +98,12 @@ def hide_streamlit_top_controls() -> None:
                 border-radius: 10px;
                 font-weight: 600;
             }
+            /* Remove top white header line while keeping page controls functional */
+            [data-testid="stHeader"] {
+                background: transparent !important;
+                border-bottom: none !important;
+                box-shadow: none !important;
+            }
             [data-testid="stDecoration"],
             [data-testid="stStatusWidget"] {
                 display: none !important;
