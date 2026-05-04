@@ -21,6 +21,7 @@ from pdf_table_pipeline.config import ExtractionConfig
 from pdf_table_pipeline import pipeline as pipeline_mod
 
 extract_catalog_price_dataframe = pipeline_mod.extract_catalog_price_dataframe
+extract_catalog_price_dataframe_l_and_t = pipeline_mod.extract_catalog_price_dataframe_l_and_t
 extract_catalog_price_dataframe_siemens = getattr(pipeline_mod, "extract_catalog_price_dataframe_siemens", None)
 extract_catalog_price_from_pdf_text = pipeline_mod.extract_catalog_price_from_pdf_text
 extract_keyword_tables = pipeline_mod.extract_keyword_tables
@@ -29,6 +30,16 @@ merge_catalog_price_results = pipeline_mod.merge_catalog_price_results
 
 SCHNEIDER_CLIENT = "Schneider"
 SIEMENS_CLIENT = "Siemens"
+ABB_CLIENT = "ABB"
+L_AND_T_CLIENT = "L And T"
+CLIENT_PLACEHOLDER = "— Select PDF client —"
+PDF_CLIENT_OPTIONS = [
+    CLIENT_PLACEHOLDER,
+    SCHNEIDER_CLIENT,
+    SIEMENS_CLIENT,
+    ABB_CLIENT,
+    L_AND_T_CLIENT,
+]
 # Accept full Siemens type codes such as:
 # - 3WJ1108-2AF02-1AA0 (multi-hyphen)
 # - 3WJ9111-0AD01 (single-hyphen)
@@ -178,6 +189,17 @@ def hide_streamlit_top_controls() -> None:
                 border-radius: 10px;
                 font-weight: 600;
             }
+            section[data-testid="stSidebar"] {
+                display: none !important;
+            }
+            div[data-testid="stSidebarCollapsedControl"] {
+                display: none !important;
+            }
+            .main .block-container {
+                max-width: 1200px;
+                padding-left: 2rem !important;
+                padding-right: 2rem !important;
+            }
             /* Remove top white header line while keeping page controls functional */
             [data-testid="stHeader"] {
                 background: transparent !important;
@@ -196,11 +218,6 @@ def hide_streamlit_top_controls() -> None:
             [data-testid="stToolbar"] button[kind="header"] {
                 display: none !important;
             }
-            /* Hide close button so user cannot collapse sidebar */
-            [data-testid="stSidebarCollapseButton"],
-            button[title="Close sidebar"] {
-                display: none !important;
-            }
         </style>
         """,
         unsafe_allow_html=True,
@@ -212,7 +229,7 @@ def main() -> None:
         page_title="PDF Catalog Price Extractor",
         page_icon="📄",
         layout="wide",
-        initial_sidebar_state="expanded",
+        initial_sidebar_state="collapsed",
     )
     hide_streamlit_top_controls()
     st.markdown(
@@ -220,68 +237,48 @@ def main() -> None:
         <div class="app-card">
             <h2 style="margin:0 0 0.35rem 0;">PDF Catalog Price Extractor</h2>
             <div class="app-muted">
-                Upload your PDF, choose target pages (e.g. <b>14</b> or <b>16,18,20-25</b>),
-                and export clean catalog-price results.
+                Upload a PDF, set client and pages on the right, then process. Full results: CSV or Excel download.
             </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    with st.sidebar:
-        st.subheader("Extraction Settings")
-        st.caption("Tune matching quality and recovery behavior.")
-        selected_client = st.selectbox(
-            "PDF Client",
-            options=[SCHNEIDER_CLIENT, SIEMENS_CLIENT],
-            index=0,
-            help="Choose the vendor format before processing the PDF.",
-        )
-        default_catalog_regex = (
-            r"(?i)^[A-Z0-9_]{5,}$"
-            if selected_client == SCHNEIDER_CLIENT
-            else SIEMENS_FULL_CATALOG_REGEX
-        )
-        pages_text = st.text_input("Pages (comma/range)", value="")
-        catalog_regex = st.text_input(
-            "Catalog regex",
-            value=default_catalog_regex,
-            help="Use strict pattern if needed, e.g. ^[C][A-Z0-9]{6,}$",
-        )
-        skip_keyword_filter = st.checkbox(
-            "Skip keyword filter for selected pages",
-            value=True,
-        )
-        allow_text_fallback = st.checkbox(
-            "Allow text fallback (less accurate)",
-            value=True,
-            help="OFF = strict Reference->MRP only (recommended). ON can recover missed pages but may pick wrong column tokens.",
-        )
-        st.markdown("---")
-        st.markdown(
-            """
-            <div class="app-muted">
-                <b>Tip:</b> If a page returns no rows, keep <i>Skip keyword filter</i> ON.
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        if selected_client == SIEMENS_CLIENT:
-            st.info("Siemens mode enabled: parser uses Siemens-friendly catalog matching.")
-
-    top_left, top_right = st.columns([1.45, 1.0], gap="large")
-    with top_left:
+    upload_col, controls_col = st.columns([1.15, 0.85], gap="large")
+    with upload_col:
         uploaded_pdf = st.file_uploader("Upload PDF", type=["pdf"])
-    with top_right:
-        st.markdown('<div class="kpi-wrap">', unsafe_allow_html=True)
-        st.metric("Target Pages", pages_text if pages_text.strip() else "Not set")
-        st.caption("Enter at least one page number to run extraction.")
-        st.markdown("</div>", unsafe_allow_html=True)
+    with controls_col:
+        with st.container(border=True):
+            selected_client = st.selectbox(
+                "PDF Client",
+                options=PDF_CLIENT_OPTIONS,
+                index=0,
+                help="Vendor format for this PDF.",
+            )
+            pages_text = st.text_input(
+                "Pages (comma/range)",
+                value="",
+                placeholder="e.g. 22-30 or 14,16,20-25",
+                help="1-based page numbers.",
+            )
+            st.caption("Select client and enter pages, then use **Process PDF** below.")
+
+    catalog_regex = (
+        SIEMENS_FULL_CATALOG_REGEX
+        if selected_client == SIEMENS_CLIENT
+        else r"(?i)^[A-Z0-9_]{5,}$"
+    )
+    skip_keyword_filter = True
+    allow_text_fallback = True
 
     run_btn = st.button(
         "Process PDF",
         type="primary",
-        disabled=uploaded_pdf is None or not pages_text.strip(),
+        disabled=(
+            uploaded_pdf is None
+            or not pages_text.strip()
+            or selected_client == CLIENT_PLACEHOLDER
+        ),
         use_container_width=True,
     )
 
@@ -290,6 +287,10 @@ def main() -> None:
 
     if uploaded_pdf is None:
         st.warning("Please upload a PDF first.")
+        return
+
+    if selected_client == CLIENT_PLACEHOLDER:
+        st.warning("Please select a PDF client.")
         return
 
     try:
@@ -313,8 +314,29 @@ def main() -> None:
         relaxed_retry_used = False
         auto_text_fallback_used = False
 
-        if selected_client == SCHNEIDER_CLIENT:
-            # Keep existing Schneider behavior unchanged.
+        if selected_client == L_AND_T_CLIENT:
+            # L&T lists use Cat. No. / M.R.P. headers (not Reference); skip Schneider keyword filter.
+            result = extract_keyword_tables(
+                temp_pdf_path,
+                cfg,
+                target_pages=target_pages,
+                apply_keyword_filter=False,
+            )
+            df_lt = extract_catalog_price_dataframe_l_and_t(
+                result, catalog_regex=catalog_regex
+            )
+            df_std = extract_catalog_price_dataframe(result, catalog_regex=catalog_regex)
+            df_struct = merge_catalog_price_results(df_lt, df_std)
+        elif selected_client == ABB_CLIENT:
+            # ABB lists use Order code + Unit MRP; Schneider keywords often miss pages — no keyword filter.
+            result = extract_keyword_tables(
+                temp_pdf_path,
+                cfg,
+                target_pages=target_pages,
+                apply_keyword_filter=False,
+            )
+            df_struct = extract_catalog_price_dataframe(result, catalog_regex=catalog_regex)
+        elif selected_client == SCHNEIDER_CLIENT:
             applied_keyword_filter = not skip_keyword_filter
             result = extract_keyword_tables(
                 temp_pdf_path,
@@ -324,8 +346,6 @@ def main() -> None:
             )
             df_struct = extract_catalog_price_dataframe(result, catalog_regex=catalog_regex)
             if df_struct.empty and applied_keyword_filter:
-                # Auto-retry for pages where headers do not contain configured keywords
-                # but Reference/LP data is present (e.g., product spotlight pages).
                 result = extract_keyword_tables(
                     temp_pdf_path,
                     cfg,
@@ -364,13 +384,15 @@ def main() -> None:
         if allow_text_fallback:
             text_fallback_catalog_regex = (
                 catalog_regex
-                if selected_client == SCHNEIDER_CLIENT
+                if selected_client != SIEMENS_CLIENT
                 else SIEMENS_FULL_CATALOG_REGEX
             )
             df_text = extract_catalog_price_from_pdf_text(
                 temp_pdf_path,
                 target_pages=target_pages,
                 catalog_regex=text_fallback_catalog_regex,
+                allow_numeric_catalog=(selected_client == L_AND_T_CLIENT),
+                strip_trailing_order_stock_markers=(selected_client == ABB_CLIENT),
             )
             df = merge_catalog_price_results(df_struct, df_text)
         else:
@@ -382,9 +404,11 @@ def main() -> None:
                     target_pages=target_pages,
                     catalog_regex=(
                         catalog_regex
-                        if selected_client == SCHNEIDER_CLIENT
+                        if selected_client != SIEMENS_CLIENT
                         else SIEMENS_FULL_CATALOG_REGEX
                     ),
+                    allow_numeric_catalog=(selected_client == L_AND_T_CLIENT),
+                    strip_trailing_order_stock_markers=(selected_client == ABB_CLIENT),
                 )
                 df = merge_catalog_price_results(df_struct, df_text)
                 auto_text_fallback_used = not df.empty
@@ -410,14 +434,12 @@ def main() -> None:
     with k3:
         st.metric("Pages Returned", df["page"].nunique() if "page" in df.columns else 0)
 
-    tab_data, tab_preview = st.tabs(["Extracted Data", "Quick Preview"])
-    with tab_data:
-        st.dataframe(df, use_container_width=True, hide_index=True)
-    with tab_preview:
-        st.markdown("Top 10 rows")
-        st.table(df.head(10))
+    st.markdown("**Preview** (first 5 rows)")
+    st.caption(f"Total **{len(df)}** rows — use download below for the full dataset.")
+    st.dataframe(df.head(5), use_container_width=True, hide_index=True)
 
-    out_stem = f"{Path(uploaded_pdf.name).stem}_{selected_client.lower()}_catalog_prices"
+    client_tag = selected_client.lower().replace(" ", "_")
+    out_stem = f"{Path(uploaded_pdf.name).stem}_{client_tag}_catalog_prices"
     dl1, dl2 = st.columns(2)
     csv_bytes = df.to_csv(index=False).encode("utf-8")
     with dl1:
