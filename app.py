@@ -21,7 +21,11 @@ from pdf_table_pipeline.config import ExtractionConfig
 from pdf_table_pipeline import pipeline as pipeline_mod
 
 extract_catalog_price_dataframe = pipeline_mod.extract_catalog_price_dataframe
-extract_catalog_price_dataframe_l_and_t = pipeline_mod.extract_catalog_price_dataframe_l_and_t
+extract_catalog_price_dataframe_l_and_t = getattr(
+    pipeline_mod,
+    "extract_catalog_price_dataframe_l_and_t",
+    extract_catalog_price_dataframe,
+)
 extract_catalog_price_dataframe_siemens = getattr(pipeline_mod, "extract_catalog_price_dataframe_siemens", None)
 extract_catalog_price_from_pdf_text = pipeline_mod.extract_catalog_price_from_pdf_text
 extract_keyword_tables = pipeline_mod.extract_keyword_tables
