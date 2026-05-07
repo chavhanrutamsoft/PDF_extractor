@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import inspect
 import io
 import re
 import sys
@@ -27,7 +28,23 @@ extract_catalog_price_dataframe_l_and_t = getattr(
     extract_catalog_price_dataframe,
 )
 extract_catalog_price_dataframe_siemens = getattr(pipeline_mod, "extract_catalog_price_dataframe_siemens", None)
-extract_catalog_price_from_pdf_text = pipeline_mod.extract_catalog_price_from_pdf_text
+_extract_catalog_price_from_pdf_text_raw = pipeline_mod.extract_catalog_price_from_pdf_text
+
+
+def extract_catalog_price_from_pdf_text(pdf_path, **kwargs):
+    """Call pipeline text extractor; drop kwargs the deployed pipeline does not accept (avoids TypeError on Cloud)."""
+    fn = _extract_catalog_price_from_pdf_text_raw
+    try:
+        sig = inspect.signature(fn)
+    except (TypeError, ValueError):
+        return fn(pdf_path, **kwargs)
+    if any(p.kind == inspect.Parameter.VAR_KEYWORD for p in sig.parameters.values()):
+        return fn(pdf_path, **kwargs)
+    allowed = set(sig.parameters)
+    filtered = {k: v for k, v in kwargs.items() if k in allowed}
+    return fn(pdf_path, **filtered)
+
+
 extract_keyword_tables = pipeline_mod.extract_keyword_tables
 format_catalog_price_output = pipeline_mod.format_catalog_price_output
 merge_catalog_price_results = pipeline_mod.merge_catalog_price_results
