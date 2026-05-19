@@ -183,9 +183,14 @@ def extract_catalog_price_dataframe(
     price_re = re.compile(price_regex)
     records: list[dict] = []
     ref_tail_re = re.compile(r"\breference\b[\]\)]*$", re.IGNORECASE)
+    order_code_header_re = re.compile(r"(?i)order(?:ing)?\s*code\b")
     mrp_tail_re = re.compile(
         r"\b(?:mrp|lp)\b(?:\s*\[[^\]]*\])?[\]\)]*$",
         re.IGNORECASE,
+    )
+    # ABB-style "Unit MRP (₹)", "L.P.(₹)", list price.
+    mrp_header_relaxed_re = re.compile(
+        r"(?i)\b(?:m\s*\.?\s*r\s*\.?\s*p|list\s*price|l\.\s*p\.?|l\.p\.)\b"
     )
 
     def parse_price_from_row(
@@ -201,6 +206,14 @@ def extract_catalog_price_dataframe(
         - "On R" + "equ" + "est" -> "On Request"
         - "1,2" + "34" -> "1,234"
         """
+        if 0 <= mrp_idx < len(row_values):
+            raw_cell = (row_values[mrp_idx] or "").strip()
+            if raw_cell:
+                compact_cell = raw_cell.replace(",", "").replace(" ", "")
+                if price_re.match(compact_cell) and not (
+                    compact_cell.isdigit() and len(compact_cell) < 3
+                ):
+                    return compact_cell, raw_cell
         start_candidates = [mrp_idx, mrp_idx - 1, mrp_idx + 1]
         checked: set[int] = set()
         is_lp_price_col = " lp" in f" {price_header}" or price_header.endswith("lp")
@@ -261,13 +274,21 @@ def extract_catalog_price_dataframe(
             if not text:
                 return False
             segs = _header_segments(text)
-            return any(ref_tail_re.search(seg.lower()) for seg in segs)
+            for seg in segs:
+                sl = seg.lower()
+                if ref_tail_re.search(sl) or order_code_header_re.search(seg):
+                    return True
+            return False
 
         def _is_mrp_header(text: str) -> bool:
             if not text:
                 return False
             segs = _header_segments(text)
-            return any(mrp_tail_re.search(seg.lower()) for seg in segs)
+            for seg in segs:
+                sl = seg.lower()
+                if mrp_header_relaxed_re.search(seg) or mrp_tail_re.search(sl):
+                    return True
+            return False
 
         for idx, h in enumerate(headers):
             hl = str(h or "").strip().lower()
@@ -300,8 +321,16 @@ def extract_catalog_price_dataframe(
         """
         for ridx, row in enumerate(rows):
             vals = [str(v or "").strip().lower() for v in row]
-            ref_cols = [i for i, v in enumerate(vals) if ref_tail_re.search(v)]
-            mrp_cols = [i for i, v in enumerate(vals) if mrp_tail_re.search(v)]
+            ref_cols = [
+                i
+                for i, v in enumerate(vals)
+                if ref_tail_re.search(v) or order_code_header_re.search(v)
+            ]
+            mrp_cols = [
+                i
+                for i, v in enumerate(vals)
+                if mrp_header_relaxed_re.search(v) or mrp_tail_re.search(v)
+            ]
             if not ref_cols or not mrp_cols:
                 continue
             pairs: list[tuple[int, int]] = []
@@ -321,6 +350,77 @@ def extract_catalog_price_dataframe(
                 return pairs, {ridx}
         return [], set()
 
+    def extract_catalog_tokens_from_blob(text: str) -> list[str]:
+        """Catalog codes from a cell or merged header (pipe / whitespace separated)."""
+        found: list[str] = []
+        seen: set[str] = set()
+        for seg in re.split(r"[|\n]+", str(text or "")):
+            seg = seg.strip()
+            if not seg or order_code_header_re.search(seg):
+                continue
+            if re.fullmatch(r"(?i)ordering\s*code\*?", seg.replace(" ", "")):
+                continue
+            for m in re.finditer(r"\b[A-Za-z0-9][A-Za-z0-9_]{4,}\b", seg):
+                raw = m.group(0).strip()
+                raw = re.sub(r"[\s\u25a0\u25aa■]+$", "", raw)
+                raw = re.sub(r"\s+n\s*$", "", raw, flags=re.I)
+                nc = re.sub(r"[^A-Za-z0-9_]", "", raw).upper()
+                if (
+                    nc
+                    and cat_re.match(nc)
+                    and looks_strict_catalog(nc)
+                    and nc not in seen
+                ):
+                    seen.add(nc)
+                    found.append(nc)
+        return found
+
+    def parse_price_from_header_blob(header: str) -> str | None:
+        """First numeric price embedded in a merged MRP/LP header cell."""
+        for seg in re.split(r"[|\n]+", str(header or "")):
+            seg = seg.strip()
+            if not seg:
+                continue
+            compact = re.sub(r"[^0-9,.]", "", seg).replace(",", "")
+            if not compact or not price_re.match(compact):
+                continue
+            if compact.isdigit() and len(compact) < 3:
+                continue
+            return compact
+        return None
+
+    def fill_prices_by_price_anchors(
+        explicit: list[str | None],
+        header_price: str | None = None,
+    ) -> list[str | None]:
+        """
+        Fill merged MRP/LP cells without bleeding the next group's price upward.
+
+        - Rows before the first in-row price use header_price when present.
+        - Each explicit price applies from its row through the row before the next price.
+        - Rows above the first explicit price in a block share that block's price.
+        """
+        n = len(explicit)
+        filled: list[str | None] = [None] * n
+        price_rows = [i for i, p in enumerate(explicit) if p]
+
+        if not price_rows:
+            if header_price:
+                return [header_price] * n
+            return filled
+
+        if header_price:
+            for i in range(0, price_rows[0]):
+                filled[i] = header_price
+
+        for idx, pr in enumerate(price_rows):
+            start = 0 if idx == 0 and not header_price else pr
+            end = (price_rows[idx + 1] - 1) if idx + 1 < len(price_rows) else (n - 1)
+            block_price = explicit[pr]
+            for i in range(start, end + 1):
+                filled[i] = block_price
+        return filled
+
     for t in result.tables:
         ref_mrp_pairs = build_ref_mrp_pairs(t.headers)
         skip_rows: set[int] = set()
@@ -329,56 +429,215 @@ def extract_catalog_price_dataframe(
         if not ref_mrp_pairs:
             # Per user rule: only process tables where we can map Reference -> MRP.
             continue
-        for ri, row in enumerate(t.rows):
-            if ri in skip_rows:
-                continue
-            row_values = [str(v).strip() if v is not None else "" for v in row]
+        nrows = len(t.rows)
+        for ref_idx, mrp_idx in ref_mrp_pairs:
+            row_catalogs: list[list[str]] = [[] for _ in range(nrows)]
+            explicit_prices: list[str | None] = [None] * nrows
+            price_raw_cells: list[str] = [""] * nrows
 
-            # Preferred path: Reference -> MRP mapping from table headers
-            if ref_mrp_pairs:
-                for ref_idx, mrp_idx in ref_mrp_pairs:
-                    if ref_idx >= len(row_values):
-                        continue
-                    ref_val = row_values[ref_idx]
-                    if not ref_val:
-                        continue
-                    normalized_catalog = re.sub(r"[^A-Za-z0-9_]", "", ref_val).upper()
-                    if (
-                        not normalized_catalog
-                        or not cat_re.match(normalized_catalog)
-                        or not looks_strict_catalog(normalized_catalog)
-                    ):
-                        continue
-                    if mrp_idx >= len(row_values):
-                        continue
-                    mrp_val = row_values[mrp_idx]
-                    if not mrp_val:
-                        continue
-                    price_header = ""
-                    if mrp_idx < len(t.headers):
-                        price_header = str(t.headers[mrp_idx] or "").lower()
-                    normalized_price, price_raw = parse_price_from_row(
+            ref_header_blob = (
+                str(t.headers[ref_idx] or "") if ref_idx < len(t.headers) else ""
+            )
+            mrp_header_blob = (
+                str(t.headers[mrp_idx] or "") if mrp_idx < len(t.headers) else ""
+            )
+            header_price = parse_price_from_header_blob(mrp_header_blob)
+            header_price_raw = mrp_header_blob if header_price else ""
+
+            for header_catalog in extract_catalog_tokens_from_blob(ref_header_blob):
+                if not header_price:
+                    continue
+                records.append(
+                    {
+                        "page": t.page,
+                        "table_id": t.table_id,
+                        "row_index": -1,
+                        "catalog_no": header_catalog,
+                        "price": header_price,
+                        "price_raw": header_price_raw or header_price,
+                        "catalog_col": ref_idx,
+                        "price_col": mrp_idx,
+                        "pole_hint": "",
+                    }
+                )
+
+            for ri, row in enumerate(t.rows):
+                if ri in skip_rows:
+                    continue
+                row_values = [str(v).strip() if v is not None else "" for v in row]
+                if ref_idx < len(row_values) and row_values[ref_idx]:
+                    row_catalogs[ri] = extract_catalog_tokens_from_blob(
+                        row_values[ref_idx]
+                    )
+                if mrp_idx < len(row_values):
+                    price_header = mrp_header_blob.lower()
+                    np, praw = parse_price_from_row(
                         row_values, mrp_idx, price_header
                     )
-                    if not normalized_price:
-                        continue
+                    if np:
+                        explicit_prices[ri] = np
+                        price_raw_cells[ri] = (praw or row_values[mrp_idx] or "")
+
+            filled_prices = fill_prices_by_price_anchors(
+                explicit_prices, header_price=header_price
+            )
+
+            for ri in range(nrows):
+                if ri in skip_rows:
+                    continue
+                if not row_catalogs[ri] or not filled_prices[ri]:
+                    continue
+                raw_disp = price_raw_cells[ri] or str(
+                    (t.rows[ri][mrp_idx] if mrp_idx < len(t.rows[ri]) else "") or ""
+                )
+                for catalog_no in row_catalogs[ri]:
                     records.append(
                         {
                             "page": t.page,
                             "table_id": t.table_id,
                             "row_index": ri,
-                            "catalog_no": normalized_catalog,
-                            "price": normalized_price,
-                            "price_raw": price_raw or mrp_val,
+                            "catalog_no": catalog_no,
+                            "price": filled_prices[ri],
+                            "price_raw": raw_disp or filled_prices[ri],
                             "catalog_col": ref_idx,
                             "price_col": mrp_idx,
                             "pole_hint": "",
                         }
                     )
-                # When header mapping exists, avoid fallback scanning to reduce noise.
-                continue
 
-            # No generic fallback scan here by design.
+    df = pd.DataFrame.from_records(records)
+    if not df.empty:
+        df = df.drop_duplicates(subset=["page", "table_id", "row_index", "catalog_no", "price"])
+        df = df.sort_values(by=["page", "table_id", "row_index", "catalog_col"]).reset_index(drop=True)
+    return df
+
+
+def extract_catalog_price_dataframe_l_and_t(
+    result: ExtractionResult,
+    catalog_regex: str = r"(?i)^[A-Z0-9_]{5,}$",
+    price_regex: str = r"^\d[\d,]*(?:\.\d+)?$",
+):
+    """
+    L&T-style price lists: headers use *Cat. No.* / *Catalog* and *M.R.P.* (not "Reference"),
+    often with multiple catalog columns and multiple MRP columns (ampere tiers) per row.
+    """
+    import pandas as pd
+
+    cat_re = re.compile(catalog_regex)
+    price_re = re.compile(price_regex)
+    cat_header_re = re.compile(
+        r"(?i)cat\.?\s*no\.?|catalog(?:ue)?\s*(?:no|number|#)|\bcat\s*#\b"
+    )
+    mrp_header_re = re.compile(r"(?i)m\s*\.?\s*r\s*\.?\s*p|list\s*price|unit\s*price")
+
+    records: list[dict] = []
+
+    def parse_price_cell(
+        row_values: list[str],
+        mrp_idx: int,
+    ) -> tuple[str | None, str | None]:
+        """
+        L&T price lists place one MRP per cell; do not merge adjacent columns (avoids
+        concatenating separate ampere-tier prices like 205|300|415 into 205300415).
+        """
+        if mrp_idx < 0 or mrp_idx >= len(row_values):
+            return None, None
+        raw = (row_values[mrp_idx] or "").strip()
+        if not raw or raw in {"-", "—"}:
+            return None, None
+        if "on" in raw.lower() and "request" in raw.lower():
+            return "On Request", raw
+        compact = raw.replace(",", "").replace(" ", "")
+        if price_re.match(compact):
+            if compact.isdigit() and len(compact) < 3:
+                return None, None
+            return compact, raw
+        return None, None
+
+    def looks_strict_catalog(token: str) -> bool:
+        if not token:
+            return False
+        if token.isdigit():
+            return True
+        return any(ch.isalpha() for ch in token) and any(ch.isdigit() for ch in token)
+
+    def header_blob_segments(h: str) -> list[str]:
+        return [seg.strip() for seg in str(h or "").split("|") if seg.strip()]
+
+    def header_has_cat_no(h: str) -> bool:
+        return any(cat_header_re.search(seg) for seg in header_blob_segments(h))
+
+    def header_has_mrp(h: str) -> bool:
+        return any(mrp_header_re.search(seg) for seg in header_blob_segments(h))
+
+    def build_cat_mrp_pairs(headers: list[str]) -> list[tuple[int, int]]:
+        ref_cols = [i for i, h in enumerate(headers) if header_has_cat_no(str(h or ""))]
+        mrp_cols = [i for i, h in enumerate(headers) if header_has_mrp(str(h or ""))]
+        if not ref_cols or not mrp_cols:
+            return []
+        pairs: list[tuple[int, int]] = []
+        for r in ref_cols:
+            for m in mrp_cols:
+                if m > r:
+                    pairs.append((r, m))
+        return pairs
+
+    def infer_pairs_from_rows(rows: list[list[str | None]]) -> tuple[list[tuple[int, int]], set[int]]:
+        for ridx, row in enumerate(rows):
+            vals = [str(v or "").strip().lower() for v in row]
+            ref_cols = [i for i, v in enumerate(vals) if cat_header_re.search(v)]
+            mrp_cols = [i for i, v in enumerate(vals) if mrp_header_re.search(v)]
+            if not ref_cols or not mrp_cols:
+                continue
+            pairs: list[tuple[int, int]] = []
+            for r in ref_cols:
+                for m in mrp_cols:
+                    if m > r:
+                        pairs.append((r, m))
+            if pairs:
+                return pairs, {ridx}
+        return [], set()
+
+    for t in result.tables:
+        ref_mrp_pairs = build_cat_mrp_pairs(t.headers)
+        skip_rows: set[int] = set()
+        if not ref_mrp_pairs:
+            ref_mrp_pairs, skip_rows = infer_pairs_from_rows(t.rows)
+        if not ref_mrp_pairs:
+            continue
+        for ri, row in enumerate(t.rows):
+            if ri in skip_rows:
+                continue
+            row_values = [str(v).strip() if v is not None else "" for v in row]
+            for ref_idx, mrp_idx in ref_mrp_pairs:
+                if ref_idx >= len(row_values):
+                    continue
+                raw_ref = row_values[ref_idx]
+                if not raw_ref or raw_ref in {"-", "—"}:
+                    continue
+                normalized_catalog = re.sub(r"[^A-Za-z0-9_]", "", raw_ref).upper()
+                if not normalized_catalog or not cat_re.match(normalized_catalog):
+                    continue
+                if not looks_strict_catalog(normalized_catalog):
+                    continue
+                if mrp_idx >= len(row_values):
+                    continue
+                normalized_price, price_raw = parse_price_cell(row_values, mrp_idx)
+                if not normalized_price:
+                    continue
+                records.append(
+                    {
+                        "page": t.page,
+                        "table_id": t.table_id,
+                        "row_index": ri,
+                        "catalog_no": normalized_catalog,
+                        "price": normalized_price,
+                        "price_raw": price_raw or row_values[mrp_idx],
+                        "catalog_col": ref_idx,
+                        "price_col": mrp_idx,
+                        "pole_hint": "",
+                    }
+                )
 
     df = pd.DataFrame.from_records(records)
     if not df.empty:
@@ -392,11 +651,15 @@ def extract_catalog_price_from_pdf_text(
     target_pages: set[int] | None = None,
     catalog_regex: str = r"(?i)^[A-Z0-9_]{5,}$",
     price_regex: str = r"^\d[\d,]*(?:\.\d+)?$",
+    *,
+    allow_numeric_catalog: bool = False,
+    strip_trailing_order_stock_markers: bool = False,
 ):
     """
     Direct catalog/price extraction from page text lines.
 
     This is useful when table structure extraction is noisy on some pages.
+    strip_trailing_order_stock_markers: strip trailing stock marker " n" from tokens (ABB order codes).
     """
     import pandas as pd
 
@@ -408,6 +671,8 @@ def extract_catalog_price_from_pdf_text(
         t = re.sub(r"[^A-Za-z0-9_]", "", token).upper()
         if not t or not cat_re.match(t):
             return False
+        if allow_numeric_catalog and t.isdigit():
+            return len(t) >= 5
         # Text fallback is intentionally stricter to avoid numeric noise;
         # pure numeric catalogs are primarily expected from structured Reference columns.
         return any(ch.isalpha() for ch in t) and any(ch.isdigit() for ch in t)
@@ -421,34 +686,38 @@ def extract_catalog_price_from_pdf_text(
             text = page.extract_text() or ""
             for line_idx, line in enumerate(text.splitlines()):
                 tokens = token_re.findall(line)
-                for i, tok in enumerate(tokens):
+                pending_catalogs: list[str] = []
+                for tok in tokens:
+                    compact = tok.replace(",", "")
+                    if price_re.match(compact):
+                        if compact.isdigit() and len(compact) < 3:
+                            continue
+                        if pending_catalogs:
+                            for catalog_no in pending_catalogs:
+                                records.append(
+                                    {
+                                        "page": pidx,
+                                        "table_id": f"p{pidx:03d}_text",
+                                        "row_index": line_idx,
+                                        "catalog_no": catalog_no,
+                                        "price": compact,
+                                        "price_raw": tok,
+                                        "catalog_col": None,
+                                        "price_col": None,
+                                        "pole_hint": "",
+                                    }
+                                )
+                            pending_catalogs = []
+                        continue
                     if not looks_catalog(tok):
                         continue
-                    catalog_no = re.sub(r"[^A-Za-z0-9_]", "", tok).upper()
-                    price_val: str | None = None
-                    for j in range(i + 1, min(i + 4, len(tokens))):
-                        cand = tokens[j]
-                        compact = cand.replace(",", "")
-                        if price_re.match(compact):
-                            if compact.isdigit() and len(compact) < 3:
-                                continue
-                            price_val = compact
-                            break
-                    if price_val is None:
-                        continue
-                    records.append(
-                        {
-                            "page": pidx,
-                            "table_id": f"p{pidx:03d}_text",
-                            "row_index": line_idx,
-                            "catalog_no": catalog_no,
-                            "price": price_val,
-                            "price_raw": price_val,
-                            "catalog_col": None,
-                            "price_col": None,
-                            "pole_hint": "",
-                        }
-                    )
+                    raw_tok = tok
+                    if strip_trailing_order_stock_markers:
+                        raw_tok = re.sub(
+                            r"\s+n\s*$", "", str(raw_tok).strip(), flags=re.I
+                        )
+                    catalog_no = re.sub(r"[^A-Za-z0-9_]", "", raw_tok).upper()
+                    pending_catalogs.append(catalog_no)
 
     df = pd.DataFrame.from_records(records)
     if not df.empty:
@@ -465,9 +734,122 @@ def merge_catalog_price_results(*dfs):
     if not valid:
         return pd.DataFrame(columns=["page", "catalog_no", "price"])
     out = pd.concat(valid, ignore_index=True)
-    out = out.drop_duplicates(subset=["page", "catalog_no", "price"])
+    if "table_id" in out.columns:
+        out["_prefer_struct"] = (
+            ~out["table_id"].astype(str).str.endswith("_text")
+        ).astype(int)
+        out["_prefer_data_row"] = out.get("row_index", -1).fillna(-1).ge(0).astype(int)
+        out = out.sort_values(
+            by=["page", "catalog_no", "_prefer_struct", "_prefer_data_row", "row_index"],
+            ascending=[True, True, False, False, True],
+        )
+        out = out.drop_duplicates(subset=["page", "catalog_no"], keep="first")
+        out = out.drop(columns=["_prefer_struct", "_prefer_data_row"], errors="ignore")
+    else:
+        out = out.drop_duplicates(subset=["page", "catalog_no", "price"])
     out = out.sort_values(by=["page", "catalog_no", "price"]).reset_index(drop=True)
     return out
+
+
+def extract_catalog_price_dataframe_siemens(
+    result: ExtractionResult,
+    catalog_regex: str = r"(?i)^[A-Z0-9][A-Z0-9_./-]{4,}$",
+):
+    """
+    Siemens-oriented extraction from table rows.
+
+    Siemens price lists often contain row patterns like:
+    Type code (e.g. 3WJ1108-2AF52-1AA0) + Unit LP (e.g. 334220.-)
+    without explicit Reference/MRP headers.
+    """
+    import pandas as pd
+
+    cat_re = re.compile(catalog_regex)
+    # Practical Siemens "Type" token: requires at least one '-' or '/' segment.
+    token_catalog_re = re.compile(r"(?i)\b[A-Z0-9]{2,}(?:[-/][A-Z0-9.]{2,})+\b")
+    # Siemens LP values are typically printed as "12345.-" / "1,23,456.-".
+    token_price_re = re.compile(r"(?<!\d)(\d[\d,]*)\s*\.-")
+    records: list[dict] = []
+    
+    def is_complete_siemens_catalog(token: str) -> bool:
+        normalized = re.sub(r"[^A-Z0-9_./-]", "", token.upper())
+        if not normalized or not cat_re.match(normalized):
+            return False
+        # Drop partial fragments like "2AF02" or "2AF02-1AA0":
+        # valid full codes typically have a long product-family prefix
+        # before first hyphen (e.g. 3WJ1108, 3WJ9111).
+        if "-" not in normalized:
+            return False
+        first_segment = normalized.split("-", 1)[0]
+        if len(first_segment) < 6:
+            return False
+        if not normalized[0].isdigit():
+            return False
+        if not any(ch.isalpha() for ch in first_segment):
+            return False
+        if not any(ch.isdigit() for ch in first_segment):
+            return False
+        return True
+
+    for t in result.tables:
+        for ri, row in enumerate(t.rows):
+            if not row:
+                continue
+            tokens: list[tuple[str, str, int]] = []
+            for ci, cell in enumerate(row):
+                text = str(cell or "").strip()
+                if not text:
+                    continue
+
+                for m in token_catalog_re.finditer(text):
+                    cat = m.group(0).strip().upper()
+                    normalized_catalog = re.sub(r"[^A-Z0-9_./-]", "", cat)
+                    if not is_complete_siemens_catalog(normalized_catalog):
+                        continue
+                    tokens.append(("catalog", normalized_catalog, ci))
+
+                for m in token_price_re.finditer(text):
+                    raw_num = m.group(1)
+                    normalized_price = raw_num.replace(",", "")
+                    if not normalized_price.isdigit() or len(normalized_price) < 3:
+                        continue
+                    tokens.append(("price", normalized_price, ci))
+
+            if not tokens:
+                continue
+
+            # Pair each catalog with nearest following price token.
+            for idx, (kind, value, col_idx) in enumerate(tokens):
+                if kind != "catalog":
+                    continue
+                price_val: str | None = None
+                price_col: int | None = None
+                for next_kind, next_value, next_col in tokens[idx + 1 :]:
+                    if next_kind == "price":
+                        price_val = next_value
+                        price_col = next_col
+                        break
+                if price_val is None:
+                    continue
+                records.append(
+                    {
+                        "page": t.page,
+                        "table_id": t.table_id,
+                        "row_index": ri,
+                        "catalog_no": value,
+                        "price": price_val,
+                        "price_raw": f"{price_val}.-",
+                        "catalog_col": col_idx,
+                        "price_col": price_col,
+                        "pole_hint": "",
+                    }
+                )
+
+    df = pd.DataFrame.from_records(records)
+    if not df.empty:
+        df = df.drop_duplicates(subset=["page", "catalog_no", "price"])
+        df = df.sort_values(by=["page", "table_id", "row_index", "catalog_col"]).reset_index(drop=True)
+    return df
 
 
 def format_catalog_price_output(df):

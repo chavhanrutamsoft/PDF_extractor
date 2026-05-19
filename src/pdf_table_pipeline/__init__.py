@@ -2,6 +2,7 @@
 
 from pdf_table_pipeline.pipeline import (
     extract_catalog_price_dataframe,
+    extract_catalog_price_dataframe_l_and_t,
     extract_catalog_price_from_pdf_text,
     extract_keyword_tables,
     format_catalog_price_output,
@@ -12,6 +13,7 @@ from pdf_table_pipeline.pipeline import (
 
 __all__ = [
     "extract_catalog_price_dataframe",
+    "extract_catalog_price_dataframe_l_and_t",
     "extract_catalog_price_from_pdf_text",
     "extract_keyword_tables",
     "format_catalog_price_output",

@@ -101,6 +101,11 @@ def main() -> int:
         action="store_true",
         help="Do not filter tables by keywords (useful with --pages and --catalog-only).",
     )
+    p.add_argument(
+        "--allow-text-fallback",
+        action="store_true",
+        help="Allow text-line fallback when structured Reference->MRP extraction misses a page (less accurate).",
+    )
     args = p.parse_args()
 
     fmt = args.format
@@ -146,16 +151,15 @@ def main() -> int:
 
     if args.catalog_only:
         df_struct = extract_catalog_price_dataframe(result, catalog_regex=args.catalog_regex)
-        df_text = extract_catalog_price_from_pdf_text(
-            args.pdf,
-            target_pages=target_pages,
-            catalog_regex=args.catalog_regex,
-        )
-        if not df_struct.empty and "page" in df_struct.columns:
-            struct_pages = set(df_struct["page"].astype(int).tolist())
-            if "page" in df_text.columns:
-                df_text = df_text[~df_text["page"].astype(int).isin(struct_pages)]
-        df = merge_catalog_price_results(df_struct, df_text)
+        if args.allow_text_fallback:
+            df_text = extract_catalog_price_from_pdf_text(
+                args.pdf,
+                target_pages=target_pages,
+                catalog_regex=args.catalog_regex,
+            )
+            df = merge_catalog_price_results(df_struct, df_text)
+        else:
+            df = df_struct
         df = format_catalog_price_output(df)
     elif args.long or fmt.startswith("long_"):
         df = tables_to_long_dataframe(result)
