@@ -1,0 +1,12 @@
+# Optional: use only when running Streamlit behind a subpath (e.g. /pdf) on cPanel.
+# Copy to config.toml on the server — do NOT use this on Streamlit Community Cloud.
+[theme]
+base = "light"
+
+[server]
+headless = true
+address = "127.0.0.1"
+port = 8501
+baseUrlPath = "pdf"
+enableCORS = false
+enableXsrfProtection = false

@@ -28,6 +28,12 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
+### Streamlit subpath (optional)
+
+If you run the Streamlit UI under a URL subpath (not `index.php`), copy
+`.streamlit/config.cpanel.toml.example` to `.streamlit/config.toml` on the server.
+Do **not** use `baseUrlPath` on [Streamlit Community Cloud](https://streamlit.io/cloud) — it causes health-check 404 errors.
+
 ### 3) Set permissions
 
 Ensure PHP can write temporary files:

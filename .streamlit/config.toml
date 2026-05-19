@@ -1,10 +1,8 @@
 [theme]
 base = "light"
 
+# Streamlit Community Cloud serves at the site root. Do not set baseUrlPath here —
+# that breaks platform health checks (404). For cPanel/subpath hosting, copy
+# config.cpanel.toml.example to config.toml on the server only.
 [server]
 headless = true
-address = "127.0.0.1"
-port = 8501
-baseUrlPath = "pdf"
-enableCORS = false
-enableXsrfProtection = false
