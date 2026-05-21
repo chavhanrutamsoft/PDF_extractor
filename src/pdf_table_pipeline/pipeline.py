@@ -183,7 +183,9 @@ def extract_catalog_price_dataframe(
     price_re = re.compile(price_regex)
     records: list[dict] = []
     ref_tail_re = re.compile(r"\breference\b[\]\)]*$", re.IGNORECASE)
-    order_code_header_re = re.compile(r"(?i)order(?:ing)?\s*code\b")
+    order_code_header_re = re.compile(
+        r"(?i)order(?:ing)?\s*code|cat\.?\s*no\.?|catalog(?:ue)?\s*(?:no|number|#)"
+    )
     mrp_tail_re = re.compile(
         r"\b(?:mrp|lp)\b(?:\s*\[[^\]]*\])?[\]\)]*$",
         re.IGNORECASE,
@@ -239,10 +241,13 @@ def extract_catalog_price_dataframe(
             joined_space = " ".join(fragments).strip()
             joined_compact = "".join(fragments).replace(" ", "")
 
-            is_on_request = "onrequest" in joined_compact.lower()
-            if is_lp_price_col or is_on_request:
-                if is_on_request:
-                    return "On Request", joined_space
+            low_joined = joined_space.lower()
+            is_on_request = "onrequest" in low_joined.replace(
+                " ", ""
+            ) or ("upon" in low_joined and "request" in low_joined)
+            if is_on_request:
+                return "On Request", joined_space
+            if is_lp_price_col:
                 return base, base
 
             # Numeric price can be split in adjacent columns, so validate compact form.
@@ -261,15 +266,31 @@ def extract_catalog_price_dataframe(
             return True
         return any(ch.isalpha() for ch in token) and any(ch.isdigit() for ch in token)
 
-    def is_probable_order_code(token: str) -> bool:
-        """ABB/Schneider order codes — not Type names like PSE18-600-70."""
+    def is_product_type_token(token: str, raw: str = "") -> bool:
+        """Model/type strings (PSE18-600-70, PSTX30-600-70) — not order/catalog numbers."""
+        raw_l = (raw or token).lower()
+        if re.search(r"^[a-z]{2,5}\d{1,4}-\d", raw_l):
+            return True
+        if re.match(r"^[A-Z]{2,5}\d{1,4}-\d", token):
+            return True
+        collapsed = re.sub(r"[^A-Z0-9]", "", token.upper())
+        if re.match(r"^[A-Z]{2,5}\d{2,}\d{2,}\d{0,3}$", collapsed) and not collapsed.startswith(
+            "1S"
+        ):
+            return True
+        return False
+
+    def is_probable_order_code(token: str, raw: str = "") -> bool:
+        """Catalog/order number vs specs, type names, or price fragments."""
         if not token or not cat_re.match(token):
+            return False
+        if is_product_type_token(token, raw):
             return False
         if token.isdigit():
             return len(token) >= 5
-        # Type / product family (PSE, PSTX, XT2, …) — not order codes.
-        if re.match(r"^[A-Z]{2,5}\d", token) and not token.startswith("1S"):
-            return False
+        # Siemens / similar: leading digit + long hyphenated type string
+        if re.match(r"^\d[A-Z0-9]", token) and len(token) >= 8:
+            return True
         if re.match(r"^1S[A-Z]{2}\d", token):
             return "R" in token and len(token) >= 12
         return looks_strict_catalog(token)
@@ -286,16 +307,17 @@ def extract_catalog_price_dataframe(
         base = re.sub(r"[\s\u25a0\u25aa■]+$", "", base)
         base = re.sub(r"\s+n\s*$", "", base, flags=re.I)
         nc = re.sub(r"[^A-Z0-9]", "", base.upper())
-        if col_idx + 1 < len(row_values):
-            nxt = str(row_values[col_idx + 1] or "").strip()
-            if (
-                nxt
-                and re.fullmatch(r"\d{1,2}", nxt)
-                and re.match(r"^1S[A-Z]{2}", nc)
-                and "R" in nc
-            ):
+        for j in range(col_idx + 1, min(col_idx + 3, len(row_values))):
+            nxt = str(row_values[j] or "").strip()
+            if not nxt or not re.fullmatch(r"\d{1,4}", nxt):
+                break
+            if re.match(r"^1S[A-Z]{2}", nc) and "R" in nc:
                 nc = nc + nxt
-        return nc if is_probable_order_code(nc) else None
+            elif len(nc) >= 5 and is_probable_order_code(nc + nxt, base + nxt):
+                nc = nc + nxt
+            else:
+                break
+        return nc if is_probable_order_code(nc, base) else None
 
     def table_order_code_score(table: ExtractedTable) -> float:
         if not table.rows:
@@ -309,29 +331,144 @@ def extract_catalog_price_dataframe(
                 if extract_order_code_from_row(rv, col):
                     hits += 1
             best = max(best, hits / len(table.rows))
-        return best
+        # Prefer focused product tables over full-page fragmented layouts.
+        width_factor = min(1.0, 8.0 / max(ncols, 1))
+        return best * width_factor
 
-    def tables_for_extraction(tables: list[ExtractedTable]) -> list[ExtractedTable]:
-        """Prefer compact product tables; skip full-page fragmented layouts."""
+    def column_price_signal(col: int, rows: list[list[str | None]], headers: list[str]) -> float:
+        hits = 0
+        for row in rows:
+            rv = [str(v).strip() if v is not None else "" for v in row]
+            blob = " ".join(rv[col : min(col + 3, len(rv))])
+            low = blob.lower().replace(" ", "")
+            if "upon" in low and "request" in low:
+                hits += 1
+                continue
+            compact = re.sub(r"[^0-9,.]", "", blob).replace(",", "")
+            if compact and price_re.match(compact) and not (
+                compact.isdigit() and len(compact) < 3
+            ):
+                hits += 1
+        if col < len(headers) and parse_prices_from_mrp_blob(str(headers[col] or "")):
+            hits += max(1, len(rows) // 4)
+        return hits / max(len(rows), 1)
+
+    def discover_catalog_price_column_pairs(
+        headers: list[str],
+        rows: list[list[str | None]],
+    ) -> tuple[list[tuple[int, int]], set[int]]:
+        """All catalog+price column pairs: labeled headers, row labels, or content."""
+        pairs = build_ref_mrp_pairs(headers)
+        if pairs:
+            return pairs, set()
+
+        pairs, skip = infer_ref_mrp_pairs_from_rows(rows)
+        if pairs:
+            return pairs, skip
+
+        if not rows:
+            return [], set()
+
+        ncols = max(len(headers), max(len(r) for r in rows))
+        code_rates = [
+            sum(
+                1
+                for row in rows
+                if extract_order_code_from_row(
+                    [str(v).strip() if v is not None else "" for v in row], col
+                )
+            )
+            / len(rows)
+            for col in range(ncols)
+        ]
+        price_rates = [column_price_signal(col, rows, headers) for col in range(ncols)]
+
+        code_cols = [c for c, r in enumerate(code_rates) if r >= 0.12]
+        price_cols = [
+            c for c, r in enumerate(price_rates) if r >= 0.06 or (c < len(headers) and parse_prices_from_mrp_blob(str(headers[c] or "")))
+        ]
+        if not code_cols or not price_cols:
+            return [], set()
+
+        discovered: list[tuple[int, int]] = []
+        used_mrp: set[int] = set()
+        for ref_idx in sorted(code_cols, key=lambda c: -code_rates[c]):
+            rights = [m for m in price_cols if m > ref_idx and m not in used_mrp]
+            if not rights:
+                continue
+            mrp_idx = min(rights)
+            used_mrp.add(mrp_idx)
+            discovered.append((ref_idx, mrp_idx))
+        return discovered, set()
+
+    def table_is_viable_product_list(table: ExtractedTable) -> bool:
+        pairs, _ = discover_catalog_price_column_pairs(table.headers, table.rows)
+        return bool(pairs) and table_order_code_score(table) >= 0.08
+
+    def iter_product_tables(tables: list[ExtractedTable]):
+        """Per page, keep tables that look like real product lists (not noisy page-wide grids)."""
         by_page: dict[int, list[ExtractedTable]] = {}
         for t in tables:
             by_page.setdefault(t.page, []).append(t)
-        chosen: list[ExtractedTable] = []
         for page_tables in by_page.values():
-            scored = [(t, table_order_code_score(t), len(t.headers)) for t in page_tables]
-            narrow_good = [
-                (t, sc)
-                for t, sc, ncol in scored
-                if sc >= 0.35 and ncol <= 7
+            scored = [
+                (t, table_order_code_score(t))
+                for t in page_tables
+                if table_is_viable_product_list(t)
             ]
-            if narrow_good:
-                chosen.extend(t for t, _ in narrow_good)
+            if not scored:
                 continue
-            best_sc = max(sc for _, sc, _ in scored)
-            for t, sc, ncol in scored:
-                if sc >= max(0.2, best_sc * 0.5) and ncol <= 12:
-                    chosen.append(t)
-        return chosen
+            best = max(sc for _, sc in scored)
+            cutoff = max(0.12, best * 0.55)
+            for t, sc in scored:
+                if sc >= cutoff:
+                    yield t
+
+    def dedupe_catalog_records(recs: list[dict]) -> list[dict]:
+        """Keep best catalog+price per page; drop truncated prefix duplicates."""
+        if not recs:
+            return recs
+        by_page_cat: dict[tuple[int, str], list[dict]] = {}
+        for r in recs:
+            by_page_cat.setdefault((r["page"], r["catalog_no"]), []).append(r)
+
+        picked: list[dict] = []
+        for (_page, _cat), group in by_page_cat.items():
+            picked.append(
+                max(
+                    group,
+                    key=lambda x: (
+                        x.get("_table_score", 0),
+                        1 if x.get("_row_had_price") else 0,
+                        1 if x["row_index"] >= 0 else 0,
+                        len(x["catalog_no"]),
+                    ),
+                )
+            )
+
+        by_page: dict[int, list[dict]] = {}
+        for r in picked:
+            by_page.setdefault(r["page"], []).append(r)
+
+        out: list[dict] = []
+        for page, page_recs in by_page.items():
+            page_recs.sort(key=lambda x: (-len(x["catalog_no"]), x["row_index"]))
+            kept: list[dict] = []
+            for r in page_recs:
+                cat = r["catalog_no"]
+                if any(
+                    len(k) > len(cat) and k.startswith(cat)
+                    for k in (x["catalog_no"] for x in kept)
+                ):
+                    continue
+                kept = [
+                    x
+                    for x in kept
+                    if not (cat.startswith(x["catalog_no"]) and len(cat) > len(x["catalog_no"]))
+                ]
+                kept.append(r)
+            out.extend(kept)
+        return out
 
     def build_ref_mrp_pairs(headers: list[str]) -> list[tuple[int, int]]:
         pairs: list[tuple[int, int]] = []
@@ -422,57 +559,6 @@ def extract_catalog_price_dataframe(
                 return pairs, {ridx}
         return [], set()
 
-    def infer_ref_mrp_pairs_by_content(
-        rows: list[list[str | None]],
-        headers: list[str] | None = None,
-    ) -> list[tuple[int, int]]:
-        """When headers are data (no 'Ordering code' label), find code + price columns."""
-        if not rows:
-            return []
-        ncols = max(
-            len(headers or []),
-            max(len(r) for r in rows),
-        )
-        code_rates: list[float] = []
-        for col in range(ncols):
-            hits = 0
-            for row in rows:
-                rv = [str(v).strip() if v is not None else "" for v in row]
-                if extract_order_code_from_row(rv, col):
-                    hits += 1
-            code_rates.append(hits / len(rows))
-
-        if max(code_rates, default=0) < 0.15:
-            return []
-
-        ref_idx = max(range(ncols), key=lambda c: code_rates[c])
-        mrp_idx: int | None = None
-        for col in range(ref_idx + 1, ncols):
-            price_hits = 0
-            for row in rows:
-                rv = [str(v).strip() if v is not None else "" for v in row]
-                blob = " ".join(rv[col : min(col + 3, len(rv))])
-                low = blob.lower().replace(" ", "")
-                if "upon" in low and "request" in low:
-                    price_hits += 1
-                    continue
-                compact = re.sub(r"[^0-9,.]", "", blob).replace(",", "")
-                if compact and price_re.match(compact) and not (
-                    compact.isdigit() and len(compact) < 3
-                ):
-                    price_hits += 1
-            if price_hits >= max(1, len(rows) * 0.08):
-                mrp_idx = col
-                break
-        if mrp_idx is None and headers:
-            for col in range(ref_idx + 1, ncols):
-                if col < len(headers) and parse_prices_from_mrp_blob(str(headers[col] or "")):
-                    mrp_idx = col
-                    break
-        if mrp_idx is None:
-            return []
-        return [(ref_idx, mrp_idx)]
-
     def extract_catalog_tokens_from_blob(text: str) -> list[str]:
         """Catalog codes from a cell or merged header (pipe / whitespace separated)."""
         found: list[str] = []
@@ -483,14 +569,19 @@ def extract_catalog_price_dataframe(
                 continue
             if re.fullmatch(r"(?i)ordering\s*code\*?", seg.replace(" ", "")):
                 continue
-            for m in re.finditer(r"\b[A-Za-z0-9][A-Za-z0-9_]{4,}\b", seg):
+            candidates: list[str] = []
+            for m in re.finditer(r"\b[A-Za-z0-9][A-Za-z0-9_./-]{4,}\b", seg):
                 raw = m.group(0).strip()
                 raw = re.sub(r"[\s\u25a0\u25aa■]+$", "", raw)
                 raw = re.sub(r"\s+n\s*$", "", raw, flags=re.I)
                 nc = re.sub(r"[^A-Za-z0-9_]", "", raw).upper()
-                if nc and is_probable_order_code(nc) and nc not in seen:
-                    seen.add(nc)
-                    found.append(nc)
+                if nc and is_probable_order_code(nc, raw):
+                    candidates.append(nc)
+            if candidates:
+                best = max(candidates, key=len)
+                if best not in seen:
+                    seen.add(best)
+                    found.append(best)
         return found
 
     def parse_prices_from_mrp_blob(header: str) -> list[str]:
@@ -551,13 +642,11 @@ def extract_catalog_price_dataframe(
                 filled[i] = block_price
         return filled
 
-    for t in tables_for_extraction(result.tables):
-        ref_mrp_pairs = build_ref_mrp_pairs(t.headers)
-        skip_rows: set[int] = set()
-        if not ref_mrp_pairs:
-            ref_mrp_pairs, skip_rows = infer_ref_mrp_pairs_from_rows(t.rows)
-        if not ref_mrp_pairs:
-            ref_mrp_pairs = infer_ref_mrp_pairs_by_content(t.rows, t.headers)
+    for t in iter_product_tables(result.tables):
+        t_score = table_order_code_score(t)
+        ref_mrp_pairs, skip_rows = discover_catalog_price_column_pairs(
+            t.headers, t.rows
+        )
         if not ref_mrp_pairs:
             continue
         nrows = len(t.rows)
@@ -652,13 +741,20 @@ def extract_catalog_price_dataframe(
                             "catalog_col": ref_idx,
                             "price_col": mrp_idx,
                             "pole_hint": "",
+                            "_table_score": t_score,
+                            "_row_had_price": bool(explicit_prices[ri]),
                         }
                     )
 
+    records = dedupe_catalog_records(records)
+    for r in records:
+        r.pop("_table_score", None)
+        r.pop("_row_had_price", None)
+
     df = pd.DataFrame.from_records(records)
     if not df.empty:
-        df = df.drop_duplicates(subset=["page", "table_id", "row_index", "catalog_no", "price"])
-        df = df.sort_values(by=["page", "table_id", "row_index", "catalog_col"]).reset_index(drop=True)
+        df = df.drop_duplicates(subset=["page", "catalog_no", "price"])
+        df = df.sort_values(by=["page", "row_index", "catalog_no"]).reset_index(drop=True)
     return df
 
 

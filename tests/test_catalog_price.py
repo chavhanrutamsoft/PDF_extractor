@@ -106,6 +106,29 @@ def test_merged_lp_multiple_price_groups_in_one_column():
     assert by_cat["1SDA076529R1"] == "34570"
 
 
+def test_multi_column_catalog_price_pairs_without_labels():
+    """Any page: multiple ref+mrp column pairs inferred from cell content."""
+    table = ExtractedTable(
+        table_id="p010_t01",
+        page=10,
+        page_index_0=9,
+        headers=[
+            "Three Pole Reference",
+            "Unit MRP [₹]",
+            "Four Pole Reference",
+            "Unit MRP [₹]",
+        ],
+        rows=[
+            ["C10B3TM016", "17860", "C10B6TM016", "25630"],
+            ["C10B3TM025", "17860", "C10B6TM025", "25630"],
+        ],
+    )
+    result = ExtractionResult(source_pdf="x.pdf", tables=[table])
+    df = extract_catalog_price_dataframe(result)
+    assert len(df) == 4
+    assert set(df["price"].tolist()) == {"17860", "25630"}
+
+
 def test_abb_pse_table_without_column_labels():
     """Data-only headers: infer order-code + LP columns; skip Type (PSE/PSTX)."""
     table = ExtractedTable(
