@@ -105,3 +105,55 @@ def test_merged_lp_multiple_price_groups_in_one_column():
     assert by_cat["1SDA067050R1"] == "23670"
     assert by_cat["1SDA076529R1"] == "34570"
 
+
+def test_abb_pse_table_without_column_labels():
+    """Data-only headers: infer order-code + LP columns; skip Type (PSE/PSTX)."""
+    table = ExtractedTable(
+        table_id="p138_t01",
+        page=138,
+        page_index_0=137,
+        headers=[
+            "7.5 | 11 | 15",
+            "18 | 25 | 30",
+            "PSE18-600-70 | PSE25-600-70 | PSE30-600-70",
+            "1SFA897101R7000 | 1SFA897102R7000 | 1SFA897103R7000",
+            "99,190 | 1,00,650 | 1,22,930",
+        ],
+        rows=[
+            ["18.5", "37", "PSE37-600-70", "1SFA897104R7000", "1,48,420"],
+            ["22", "45", "PSE45-600-70", "1SFA897105R7000", "1,68,470"],
+        ],
+    )
+    result = ExtractionResult(source_pdf="x.pdf", tables=[table])
+    df = extract_catalog_price_dataframe(result)
+    assert "PSE37" not in "".join(df["catalog_no"].tolist())
+    assert "PSE45" not in "".join(df["catalog_no"].tolist())
+    by_cat = dict(zip(df["catalog_no"], df["price"], strict=True))
+    assert by_cat["1SFA897101R7000"] == "99190"
+    assert by_cat["1SFA897104R7000"] == "148420"
+    assert by_cat["1SFA897105R7000"] == "168470"
+
+
+def test_abb_upon_request_merged_lp_column():
+    table = ExtractedTable(
+        table_id="p138_t02",
+        page=138,
+        page_index_0=137,
+        headers=[
+            "15 | 18.5 | 22",
+            "30 | 37 | 45",
+            "PSTX30-600-70 | PSTX37-600-70 | PSTX45-600-70",
+            "1SFA898103R7000 | 1SFA898104R7000 | 1SFA898105R7000",
+            "Upon request",
+        ],
+        rows=[
+            ["30", "60", "PSTX60-600-70", "1SFA898106R7000", None],
+            ["37", "72", "PSTX72-600-70", "1SFA898107R7000", None],
+        ],
+    )
+    result = ExtractionResult(source_pdf="x.pdf", tables=[table])
+    df = extract_catalog_price_dataframe(result)
+    assert all(p == "On Request" for p in df["price"].tolist())
+    assert "PSTX60" not in "".join(df["catalog_no"].tolist())
+    assert "1SFA898106R7000" in df["catalog_no"].tolist()
+
