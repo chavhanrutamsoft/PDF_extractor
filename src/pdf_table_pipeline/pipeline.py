@@ -19,6 +19,70 @@ from pdf_table_pipeline.qa_words import word_alignment_confidence
 
 logger = logging.getLogger(__name__)
 
+# Product family / type labels (PSE18-600-70, PSE105, PSTX30) — not order/catalog numbers.
+_TYPE_PREFIX_RE = re.compile(r"^[A-Z]{2,5}\d{1,5}$")
+_TYPE_HYPHEN_RE = re.compile(r"^[a-z]{2,5}\d{1,4}-\d", re.I)
+
+
+def is_product_type_token(token: str, raw: str = "") -> bool:
+    raw_l = (raw or token).strip()
+    if _TYPE_HYPHEN_RE.search(raw_l):
+        return True
+    collapsed = re.sub(r"[^A-Z0-9]", "", raw_l.upper())
+    if collapsed.startswith("1S"):
+        return False
+    if _TYPE_PREFIX_RE.match(collapsed):
+        return True
+    if re.match(r"^[A-Z]{2,5}\d{2,}\d{2,}\d{0,3}$", collapsed):
+        return True
+    return False
+
+
+def looks_strict_catalog_token(token: str) -> bool:
+    if not token:
+        return False
+    if token.isdigit():
+        return True
+    return any(ch.isalpha() for ch in token) and any(ch.isdigit() for ch in token)
+
+
+def is_probable_order_code(
+    token: str,
+    catalog_regex: str = r"(?i)^[A-Z0-9_]{5,}$",
+    raw: str = "",
+) -> bool:
+    if not token:
+        return False
+    cat_re = re.compile(catalog_regex)
+    if not cat_re.match(token):
+        return False
+    if is_product_type_token(token, raw):
+        return False
+    if token.isdigit():
+        return len(token) >= 5
+    if re.match(r"^\d[A-Z0-9]", token) and len(token) >= 8:
+        return True
+    if re.match(r"^1S[A-Z]{2}\d", token):
+        return "R" in token and len(token) >= 12
+    return looks_strict_catalog_token(token)
+
+
+def filter_valid_catalog_price_df(df, catalog_regex: str = r"(?i)^[A-Z0-9_]{5,}$"):
+    """Drop type-column noise (PSE/PSTX) and invalid catalog tokens from output."""
+    import pandas as pd
+
+    if df is None or df.empty or "catalog_no" not in df.columns:
+        return df
+    out = df.copy()
+    out["catalog_no"] = out["catalog_no"].astype(str)
+    mask = out["catalog_no"].apply(
+        lambda c: is_probable_order_code(c, catalog_regex=catalog_regex)
+    )
+    out = out[mask]
+    if out.empty:
+        return pd.DataFrame(columns=df.columns)
+    return out.reset_index(drop=True)
+
 
 def extract_keyword_tables(
     pdf_path: str | Path,
@@ -258,42 +322,8 @@ def extract_catalog_price_dataframe(
                 return compact_numeric, joined_space
         return None, None
 
-    def looks_strict_catalog(token: str) -> bool:
-        # Catalog can be pure numeric (e.g. 28900) OR mixed alphanumeric.
-        if not token:
-            return False
-        if token.isdigit():
-            return True
-        return any(ch.isalpha() for ch in token) and any(ch.isdigit() for ch in token)
-
-    def is_product_type_token(token: str, raw: str = "") -> bool:
-        """Model/type strings (PSE18-600-70, PSTX30-600-70) — not order/catalog numbers."""
-        raw_l = (raw or token).lower()
-        if re.search(r"^[a-z]{2,5}\d{1,4}-\d", raw_l):
-            return True
-        if re.match(r"^[A-Z]{2,5}\d{1,4}-\d", token):
-            return True
-        collapsed = re.sub(r"[^A-Z0-9]", "", token.upper())
-        if re.match(r"^[A-Z]{2,5}\d{2,}\d{2,}\d{0,3}$", collapsed) and not collapsed.startswith(
-            "1S"
-        ):
-            return True
-        return False
-
-    def is_probable_order_code(token: str, raw: str = "") -> bool:
-        """Catalog/order number vs specs, type names, or price fragments."""
-        if not token or not cat_re.match(token):
-            return False
-        if is_product_type_token(token, raw):
-            return False
-        if token.isdigit():
-            return len(token) >= 5
-        # Siemens / similar: leading digit + long hyphenated type string
-        if re.match(r"^\d[A-Z0-9]", token) and len(token) >= 8:
-            return True
-        if re.match(r"^1S[A-Z]{2}\d", token):
-            return "R" in token and len(token) >= 12
-        return looks_strict_catalog(token)
+    def is_order_code(token: str, raw: str = "") -> bool:
+        return is_probable_order_code(token, catalog_regex=catalog_regex, raw=raw)
 
     def extract_order_code_from_row(
         row_values: list[str], col_idx: int
@@ -313,11 +343,11 @@ def extract_catalog_price_dataframe(
                 break
             if re.match(r"^1S[A-Z]{2}", nc) and "R" in nc:
                 nc = nc + nxt
-            elif len(nc) >= 5 and is_probable_order_code(nc + nxt, base + nxt):
+            elif len(nc) >= 5 and is_order_code(nc + nxt, base + nxt):
                 nc = nc + nxt
             else:
                 break
-        return nc if is_probable_order_code(nc, base) else None
+        return nc if is_order_code(nc, base) else None
 
     def table_order_code_score(table: ExtractedTable) -> float:
         if not table.rows:
@@ -575,7 +605,7 @@ def extract_catalog_price_dataframe(
                 raw = re.sub(r"[\s\u25a0\u25aa■]+$", "", raw)
                 raw = re.sub(r"\s+n\s*$", "", raw, flags=re.I)
                 nc = re.sub(r"[^A-Za-z0-9_]", "", raw).upper()
-                if nc and is_probable_order_code(nc, raw):
+                if nc and is_order_code(nc, raw):
                     candidates.append(nc)
             if candidates:
                 best = max(candidates, key=len)
@@ -915,13 +945,9 @@ def extract_catalog_price_from_pdf_text(
 
     def looks_catalog(token: str) -> bool:
         t = re.sub(r"[^A-Za-z0-9_]", "", token).upper()
-        if not t or not cat_re.match(t):
-            return False
         if allow_numeric_catalog and t.isdigit():
             return len(t) >= 5
-        # Text fallback is intentionally stricter to avoid numeric noise;
-        # pure numeric catalogs are primarily expected from structured Reference columns.
-        return any(ch.isalpha() for ch in t) and any(ch.isdigit() for ch in t)
+        return is_probable_order_code(t, catalog_regex=catalog_regex, raw=token)
 
     records: list[dict] = []
     pdf_path = Path(pdf_path)
@@ -967,6 +993,7 @@ def extract_catalog_price_from_pdf_text(
 
     df = pd.DataFrame.from_records(records)
     if not df.empty:
+        df = filter_valid_catalog_price_df(df, catalog_regex=catalog_regex)
         df = df.drop_duplicates(subset=["page", "catalog_no", "price"])
         df = df.sort_values(by=["page", "row_index", "catalog_no"]).reset_index(drop=True)
     return df
@@ -980,6 +1007,7 @@ def merge_catalog_price_results(*dfs):
     if not valid:
         return pd.DataFrame(columns=["page", "catalog_no", "price"])
     out = pd.concat(valid, ignore_index=True)
+    out = filter_valid_catalog_price_df(out)
     if "table_id" in out.columns:
         out["_prefer_struct"] = (
             ~out["table_id"].astype(str).str.endswith("_text")
@@ -997,45 +1025,84 @@ def merge_catalog_price_results(*dfs):
     return out
 
 
-def extract_catalog_price_dataframe_siemens(
-    result: ExtractionResult,
-    catalog_regex: str = r"(?i)^[A-Z0-9][A-Z0-9_./-]{4,}$",
-):
-    """
-    Siemens-oriented extraction from table rows.
+# Hyphenated MCCB/type codes (3WJ1108-2AF02-1AA0) and compact Betagard/EI
+# reference numbers (5SL61057RC, 8GB9901, 8GB9905LSP, 5SD74325).
+SIEMENS_FULL_CATALOG_REGEX = (
+    r"(?i)^(?:"
+    r"\d[A-Z0-9]{5,}(?:-[A-Z0-9.]{1,})+"
+    r"|"
+    r"\d[A-Z]{2,}[A-Z0-9]{4,}"
+    r")$"
+)
+_SIEMENS_COMPACT_CATALOG_RE = re.compile(r"(?i)^\d[A-Z]{2,}[A-Z0-9]{4,}$")
+_SIEMENS_TOKEN_CATALOG_RE = re.compile(
+    r"(?i)\b(?:"
+    r"[A-Z0-9]{2,}(?:[-/][A-Z0-9.]{1,})+"
+    r"|"
+    r"\d[A-Z]{2,}[A-Z0-9]{4,}"
+    r")\b"
+)
+_SIEMENS_TOKEN_PRICE_RE = re.compile(r"(?<!\d)(\d[\d,]*)\s*\.-")
 
-    Siemens price lists often contain row patterns like:
-    Type code (e.g. 3WJ1108-2AF52-1AA0) + Unit LP (e.g. 334220.-)
-    without explicit Reference/MRP headers.
+
+def is_complete_siemens_catalog(token: str, catalog_regex: str = SIEMENS_FULL_CATALOG_REGEX) -> bool:
     """
-    import pandas as pd
+    Accept full Siemens catalog/type codes.
+
+    Supports:
+    - Hyphenated type codes: 3WJ1108-2AF02-1AA0 (rejects fragments like 2AF02-1AA0)
+    - Compact Electrical Installation refs: 5SL61057RC, 8GB9901, 8GB9905LSP
+    """
+    normalized = re.sub(r"[^A-Z0-9_./-]", "", (token or "").upper())
+    if not normalized or not normalized[0].isdigit():
+        return False
+    if not any(ch.isalpha() for ch in normalized):
+        return False
+    if not any(ch.isdigit() for ch in normalized):
+        return False
 
     cat_re = re.compile(catalog_regex)
-    # Practical Siemens "Type" token: requires at least one '-' or '/' segment.
-    token_catalog_re = re.compile(r"(?i)\b[A-Z0-9]{2,}(?:[-/][A-Z0-9.]{2,})+\b")
-    # Siemens LP values are typically printed as "12345.-" / "1,23,456.-".
-    token_price_re = re.compile(r"(?<!\d)(\d[\d,]*)\s*\.-")
-    records: list[dict] = []
-    
-    def is_complete_siemens_catalog(token: str) -> bool:
-        normalized = re.sub(r"[^A-Z0-9_./-]", "", token.upper())
-        if not normalized or not cat_re.match(normalized):
+    if "-" in normalized or "/" in normalized:
+        if not cat_re.match(normalized) and not re.match(
+            r"(?i)^\d[A-Z0-9]{5,}(?:[-/][A-Z0-9.]{1,})+$", normalized
+        ):
             return False
         # Drop partial fragments like "2AF02" or "2AF02-1AA0":
         # valid full codes typically have a long product-family prefix
         # before first hyphen (e.g. 3WJ1108, 3WJ9111).
-        if "-" not in normalized:
-            return False
-        first_segment = normalized.split("-", 1)[0]
+        first_segment = re.split(r"[-/]", normalized, maxsplit=1)[0]
         if len(first_segment) < 6:
-            return False
-        if not normalized[0].isdigit():
             return False
         if not any(ch.isalpha() for ch in first_segment):
             return False
         if not any(ch.isdigit() for ch in first_segment):
             return False
         return True
+
+    # Compact Betagard / A-to-Z Electrical Installation reference numbers.
+    if not _SIEMENS_COMPACT_CATALOG_RE.match(normalized):
+        return False
+    if not (7 <= len(normalized) <= 24):
+        return False
+    # Accept compact codes even when caller still passes a hyphen-only regex.
+    return True
+
+
+def extract_catalog_price_dataframe_siemens(
+    result: ExtractionResult,
+    catalog_regex: str = SIEMENS_FULL_CATALOG_REGEX,
+):
+    """
+    Siemens-oriented extraction from table rows.
+
+    Siemens price lists often contain row patterns like:
+    - Type code (e.g. 3WJ1108-2AF52-1AA0) + Unit LP (e.g. 334220.-)
+    - Compact Reference No (e.g. 5SL61057RC) + Unit MRP (e.g. 697.-)
+    without reliable column headers after pdfplumber cell splits.
+    """
+    import pandas as pd
+
+    records: list[dict] = []
 
     for t in result.tables:
         for ri, row in enumerate(t.rows):
@@ -1047,14 +1114,16 @@ def extract_catalog_price_dataframe_siemens(
                 if not text:
                     continue
 
-                for m in token_catalog_re.finditer(text):
+                for m in _SIEMENS_TOKEN_CATALOG_RE.finditer(text):
                     cat = m.group(0).strip().upper()
                     normalized_catalog = re.sub(r"[^A-Z0-9_./-]", "", cat)
-                    if not is_complete_siemens_catalog(normalized_catalog):
+                    if not is_complete_siemens_catalog(
+                        normalized_catalog, catalog_regex=catalog_regex
+                    ):
                         continue
                     tokens.append(("catalog", normalized_catalog, ci))
 
-                for m in token_price_re.finditer(text):
+                for m in _SIEMENS_TOKEN_PRICE_RE.finditer(text):
                     raw_num = m.group(1)
                     normalized_price = raw_num.replace(",", "")
                     if not normalized_price.isdigit() or len(normalized_price) < 3:
@@ -1114,6 +1183,7 @@ def format_catalog_price_output(df):
         if col not in out.columns:
             out[col] = None
     out = out[wanted]
+    out = filter_valid_catalog_price_df(out)
     out = out.drop_duplicates(subset=wanted).sort_values(by=["page", "catalog_no", "price"])
     out = out.reset_index(drop=True)
     return out

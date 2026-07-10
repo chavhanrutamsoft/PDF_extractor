@@ -180,3 +180,53 @@ def test_abb_upon_request_merged_lp_column():
     assert "PSTX60" not in "".join(df["catalog_no"].tolist())
     assert "1SFA898106R7000" in df["catalog_no"].tolist()
 
+
+def test_text_fallback_rejects_type_column_tokens():
+    """Line text must not treat PSE/PSTX type labels as catalog numbers."""
+    from pdf_table_pipeline.pipeline import is_probable_order_code
+
+    assert not is_probable_order_code("PSE18", raw="PSE18")
+    assert not is_probable_order_code("PSE105", raw="PSE105")
+    assert not is_probable_order_code("PSTX1050", raw="PSTX1050")
+    assert is_probable_order_code("1SFA897101R7000", raw="1SFA897101R7000")
+
+
+def test_siemens_accepts_hyphenated_and_compact_catalogs():
+    """MCCB hyphenated codes and Betagard compact Reference Nos both valid."""
+    from pdf_table_pipeline.models import ExtractedTable, ExtractionResult
+    from pdf_table_pipeline.pipeline import (
+        SIEMENS_FULL_CATALOG_REGEX,
+        extract_catalog_price_dataframe_siemens,
+        is_complete_siemens_catalog,
+    )
+    import re
+
+    cat_re = re.compile(SIEMENS_FULL_CATALOG_REGEX)
+    assert is_complete_siemens_catalog("3WJ1108-2AF02-1AA0")
+    assert is_complete_siemens_catalog("5SL61057RC")
+    assert is_complete_siemens_catalog("8GB9901")
+    assert is_complete_siemens_catalog("8GB9905LSP")
+    assert not is_complete_siemens_catalog("2AF02-1AA0")  # fragment
+    assert not is_complete_siemens_catalog("5SL6")  # too short
+    assert cat_re.match("5SL61057RC")
+    assert cat_re.match("3WJ1108-2AF02-1AA0")
+    assert not cat_re.match("2AF02-1AA0")
+
+    table = ExtractedTable(
+        table_id="p005_t01",
+        page=5,
+        page_index_0=4,
+        headers=["Reference No", "Unit MRP"],
+        rows=[
+            ["5SL61057RC", "697.-"],
+            ["8GB9901", "175.-"],
+            ["3WJ1108-2AF02-1AA0", "334220.-"],
+        ],
+    )
+    result = ExtractionResult(source_pdf="x.pdf", tables=[table])
+    df = extract_catalog_price_dataframe_siemens(result)
+    by_cat = dict(zip(df["catalog_no"], df["price"], strict=True))
+    assert by_cat["5SL61057RC"] == "697"
+    assert by_cat["8GB9901"] == "175"
+    assert by_cat["3WJ1108-2AF02-1AA0"] == "334220"
+

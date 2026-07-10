@@ -1,0 +1,9 @@
+﻿__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.streamlit/secrets.toml
+ABB pdf/ABB_Electrification India_Pricelist_May-2026.pdf
+case_1782902085_*.pdf
+_test_*.csv
+_out_*.csv

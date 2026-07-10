@@ -28,7 +28,14 @@ extract_catalog_price_dataframe_l_and_t = getattr(
     extract_catalog_price_dataframe,
 )
 extract_catalog_price_dataframe_siemens = getattr(pipeline_mod, "extract_catalog_price_dataframe_siemens", None)
+is_complete_siemens_catalog = getattr(pipeline_mod, "is_complete_siemens_catalog", None)
 _extract_catalog_price_from_pdf_text_raw = pipeline_mod.extract_catalog_price_from_pdf_text
+# Prefer pipeline constant (supports compact Betagard + hyphenated MCCB codes).
+SIEMENS_FULL_CATALOG_REGEX = getattr(
+    pipeline_mod,
+    "SIEMENS_FULL_CATALOG_REGEX",
+    r"(?i)^(?:\d[A-Z0-9]{5,}(?:-[A-Z0-9.]{1,})+|\d[A-Z]{2,}[A-Z0-9]{4,})$",
+)
 
 
 def extract_catalog_price_from_pdf_text(pdf_path, **kwargs):
@@ -61,38 +68,37 @@ PDF_CLIENT_OPTIONS = [
     ABB_CLIENT,
     L_AND_T_CLIENT,
 ]
-# Accept full Siemens type codes such as:
-# - 3WJ1108-2AF02-1AA0 (multi-hyphen)
-# - 3WJ9111-0AD01 (single-hyphen)
-SIEMENS_FULL_CATALOG_REGEX = r"(?i)^\d[A-Z0-9]{5,}(?:-[A-Z0-9.]{4,})+$"
-
-
 def extract_catalog_price_dataframe_siemens_fallback(
     result,
     catalog_regex: str = SIEMENS_FULL_CATALOG_REGEX,
 ) -> pd.DataFrame:
     """Cloud-safe Siemens parser when pipeline module is outdated."""
-    cat_re = re.compile(catalog_regex)
-    token_catalog_re = re.compile(r"(?i)\b[A-Z0-9]{2,}(?:[-/][A-Z0-9.]{2,})+\b")
+    token_catalog_re = re.compile(
+        r"(?i)\b(?:"
+        r"[A-Z0-9]{2,}(?:[-/][A-Z0-9.]{1,})+"
+        r"|"
+        r"\d[A-Z]{2,}[A-Z0-9]{4,}"
+        r")\b"
+    )
     token_price_re = re.compile(r"(?<!\d)(\d[\d,]*)\s*\.-")
     records: list[dict] = []
 
-    def is_complete_siemens_catalog(token: str) -> bool:
+    def _is_complete(token: str) -> bool:
+        if is_complete_siemens_catalog is not None:
+            return bool(is_complete_siemens_catalog(token, catalog_regex=catalog_regex))
         normalized = re.sub(r"[^A-Z0-9_./-]", "", token.upper())
-        if not normalized or not cat_re.match(normalized):
+        if not normalized or not normalized[0].isdigit():
             return False
-        if "-" not in normalized:
-            return False
-        first_segment = normalized.split("-", 1)[0]
-        if len(first_segment) < 6:
-            return False
-        if not normalized[0].isdigit():
-            return False
-        if not any(ch.isalpha() for ch in first_segment):
-            return False
-        if not any(ch.isdigit() for ch in first_segment):
-            return False
-        return True
+        if "-" in normalized:
+            first_segment = normalized.split("-", 1)[0]
+            return (
+                len(first_segment) >= 6
+                and any(ch.isalpha() for ch in first_segment)
+                and any(ch.isdigit() for ch in first_segment)
+            )
+        return bool(re.match(r"(?i)^\d[A-Z]{2,}[A-Z0-9]{4,}$", normalized)) and 7 <= len(
+            normalized
+        ) <= 24
 
     for t in result.tables:
         for ri, row in enumerate(t.rows):
@@ -103,7 +109,7 @@ def extract_catalog_price_dataframe_siemens_fallback(
                     continue
                 for m in token_catalog_re.finditer(text):
                     catalog = re.sub(r"[^A-Z0-9_./-]", "", m.group(0).strip().upper())
-                    if is_complete_siemens_catalog(catalog):
+                    if _is_complete(catalog):
                         tokens.append(("catalog", catalog, ci))
                 for m in token_price_re.finditer(text):
                     price = m.group(1).replace(",", "")
