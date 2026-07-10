@@ -3,7 +3,12 @@
 *.pyo
 .pytest_cache/
 .streamlit/secrets.toml
-ABB pdf/ABB_Electrification India_Pricelist_May-2026.pdf
-case_1782902085_*.pdf
+
+# Never commit vendor pricelist PDFs — code only
+*.pdf
+
 _test_*.csv
 _out_*.csv
+*.xlsx
+catalog_prices*.csv
+catalog_prices*.xlsx
